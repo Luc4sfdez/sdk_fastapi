@@ -1,0 +1,161 @@
+/* Variables CSS personalizadas */
+:root {
+    --primary-color: #e10600;
+    --primary-light: #ff3b36;
+    --primary-dark: #b30500;
+    --secondary-color: #000000;
+    --secondary-light: #333333;
+    --secondary-dark: #000000;
+    --text-light: #ffffff;
+    --text-dark: #000000;
+    --bg-light: #ffffff;
+    --bg-dark: #121212;
+}
+
+/* Clases de utilidad para colores */
+.primary-bg { background-color: var(--primary-color); }
+.primary-text { color: var(--primary-color); }
+.secondary-bg { background-color: var(--secondary-color); }
+.secondary-text { color: var(--secondary-color); }
+
+/* Transiciones para cambio de tema */
+.transition-theme {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Estilos para tema oscuro */
+.dark .dark\:bg-gray-900 { background-color: var(--bg-dark); }
+.dark .dark\:bg-gray-800 { background-color: #1e1e1e; }
+.dark .dark\:bg-gray-700 { background-color: #2d2d2d; }
+.dark .dark\:text-white { color: var(--text-light); }
+.dark .dark\:text-gray-300 { color: #d1d5db; }
+.dark .dark\:text-gray-400 { color: #9ca3af; }
+.dark .dark\:border-gray-700 { border-color: #374151; }
+.dark .dark\:border-gray-600 { border-color: #4b5563; }
+
+/* Estilos para tema claro */
+.light .light\:bg-white { background-color: var(--bg-light); }
+.light .light\:text-black { color: var(--text-dark); }
+
+/* Estilos para sidebar */
+.sidebar {
+    width: 280px;
+    transition: width 0.3s ease;
+}
+.sidebar.collapsed {
+    width: 80px;
+}
+.sidebar-text {
+    transition: opacity 0.2s ease;
+}
+.collapsed .sidebar-text {
+    opacity: 0;
+    display: none;
+}
+.service-icon {
+    transition: margin 0.3s ease;
+}
+.collapsed .service-icon {
+    margin-right: 0;
+}
+
+/* Estilos para modales */
+.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s ease;
+}
+.modal-content {
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+.modal-overlay:not(.hidden) .modal-content {
+    transform: scale(1);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.animate-fadeIn {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Efectos de hover mejorados */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Gradientes personalizados */
+.gradient-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+.gradient-secondary {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-light) 100%);
+}
+
+/* Botones mejorados */
+.btn-custom {
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Cards con efectos */
+.card-enhanced {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+.card-enhanced:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Indicadores de estado */
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+.status-healthy { background-color: #28a745; }
+.status-warning { background-color: #ffc107; }
+.status-error { background-color: #dc3545; }
+.status-unknown { background-color: #6c757d; }
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .mobile-hidden { display: none !important; }
+    .mobile-full { width: 100% !important; }
+    .mobile-stack { flex-direction: column !important; }
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}

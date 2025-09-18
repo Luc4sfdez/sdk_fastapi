@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}API Documentation & Testing{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/api_docs.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="api-docs-container">
+    <!-- Header -->
+    <div class="api-docs-header">
+        <div class="header-content">
+            <h1><i class="fas fa-book"></i> API Documentation & Testing</h1>
+            <p>Interactive API documentation and testing interface</p>
+        </div>
+        
+        <div class="header-actions">
+            <div class="theme-selector">
+                <label for="theme-select">Theme:</label>
+                <select id="theme-select">
+                    <option value="default">Default</option>
+                    <option value="dark">Dark</option>
+                    <option value="blue">Blue</option>
+                </select>
+            </div>
+            
+            <button id="refresh-docs" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="api-docs-main">
+        <!-- Sidebar -->
+        <div class="api-docs-sidebar">
+            <!-- Service Filter -->
+            <div class="sidebar-section">
+                <h3><i class="fas fa-filter"></i> Filter Services</h3>
+                <div class="service-filter">
+                    <input type="text" id="service-search" placeholder="Search services...">
+                    <div id="service-list" class="service-list">
+                        <!-- Services will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endpoint Search -->
+            <div class="sidebar-section">
+                <h3><i class="fas fa-search"></i> Search Endpoints</h3>
+                <div class="endpoint-search">
+                    <input type="text" id="endpoint-search" placeholder="Search endpoints...">
+                    <div class="search-filters">
+                        <label>
+                            <input type="checkbox" id="filter-get" checked> GET
+                        </label>
+                        <label>
+                            <input type="checkbox" id="filter-post" checked> POST
+                        </label>
+                        <label>
+                            <input type="checkbox" id="filter-put" checked> PUT
+                        </label>
+                        <label>
+                            <input type="checkbox" id="filter-delete" checked> DELETE
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved Requests -->
+            <div class="sidebar-section">
+                <h3><i class="fas fa-bookmark"></i> Saved Requests</h3>
+                <div id="saved-requests" class="saved-requests">
+                    <!-- Saved requests will be loaded here -->
+                </div>
+                <button id="clear-saved" class="btn btn-sm btn-outline">Clear All</button>
+            </div>
+
+            <!-- Test History -->
+            <div class="sidebar-section">
+                <h3><i class="fas fa-history"></i> Test History</h3>
+                <div class="history-controls">
+                    <select id="history-filter">
+                        <option value="all">All Services</option>
+                    </select>
+                    <button id="clear-history" class="btn btn-sm btn-outline">Clear</button>
+                </div>
+                <div id="test-history" class="test-history">
+                    <!-- Test history will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="api-docs-content">
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" data-tab="documentation">
+                    <i class="fas fa-book"></i> Documentation
+                </button>
+                <button class="tab-btn" data-tab="testing">
+                    <i class="fas fa-flask"></i> API Testing
+                </button>
+                <button class="tab-btn" data-tab="swagger">
+                    <i class="fas fa-code"></i> Swagger UI
+                </button>
+                <button class="tab-btn" data-tab="statistics">
+                    <i class="fas fa-chart-bar"></i> Statistics
+                </button>
+            </div>
+
+            <!-- Documentation Tab -->
+            <div id="documentation-tab" class="tab-content active">
+                <div class="documentation-header">
+                    <div class="doc-controls">
+                        <select id="service-selector">
+                            <option value="">Select a service...</option>
+                        </select>
+                        <button id="export-docs" class="btn btn-secondary">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="documentation-content" class="documentation-content">
+                    <div class="welcome-message">
+                        <i class="fas fa-info-circle"></i>
+                        <h3>Welcome to API Documentation</h3>
+                        <p>Select a service from the dropdown to view its documentation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Testing Tab -->
+            <div id="testing-tab" class="tab-content">
+                <div class="testing-interface">
+                    <!-- Request Builder -->
+                    <div class="request-builder">
+                        <h3><i class="fas fa-cog"></i> Request Builder</h3>
+                        
+                        <div class="request-form">
+                            <!-- Service & Endpoint Selection -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="test-service">Service:</label>
+                                    <select id="test-service">
+                                        <option value="">Select service...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="test-endpoint">Endpoint:</label>
+                                    <select id="test-endpoint">
+                                        <option value="">Select endpoint...</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Method & URL Display -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Method:</label>
+                                    <span id="request-method" class="method-badge">GET</span>
+                                </div>
+                                <div class="form-group flex-grow">
+                                    <label>URL:</label>
+                                    <input type="text" id="request-url" readonly>
+                                </div>
+                            </div>
+
+                            <!-- Parameters -->
+                            <div class="parameters-section">
+                                <h4><i class="fas fa-sliders-h"></i> Parameters</h4>
+                                <div id="parameters-container">
+                                    <!-- Parameters will be generated here -->
+                                </div>
+                            </div>
+
+                            <!-- Headers -->
+                            <div class="headers-section">
+                                <h4><i class="fas fa-tags"></i> Headers</h4>
+                                <div id="headers-container">
+                                    <div class="header-row">
+                                        <input type="text" placeholder="Header name" class="header-name">
+                                        <input type="text" placeholder="Header value" class="header-value">
+                                        <button type="button" class="btn btn-sm btn-outline add-header">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Request Body -->
+                            <div class="body-section">
+                                <h4><i class="fas fa-file-code"></i> Request Body</h4>
+                                <div class="body-controls">
+                                    <select id="body-type">
+                                        <option value="none">None</option>
+                                        <option value="json">JSON</option>
+                                        <option value="form">Form Data</option>
+                                        <option value="text">Raw Text</option>
+                                    </select>
+                                </div>
+                                <div id="body-container">
+                                    <textarea id="request-body" placeholder="Request body (JSON format)"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Test Controls -->
+                            <div class="test-controls">
+                                <button id="send-request" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Send Request
+                                </button>
+                                <button id="save-request" class="btn btn-secondary">
+                                    <i class="fas fa-bookmark"></i> Save Request
+                                </button>
+                                <button id="clear-form" class="btn btn-outline">
+                                    <i class="fas fa-eraser"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Response Display -->
+                    <div class="response-display">
+                        <h3><i class="fas fa-reply"></i> Response</h3>
+                        
+                        <div id="response-container" class="response-container">
+                            <div class="no-response">
+                                <i class="fas fa-info-circle"></i>
+                                <p>No response yet. Send a request to see the response here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Swagger UI Tab -->
+            <div id="swagger-tab" class="tab-content">
+                <div class="swagger-controls">
+                    <select id="swagger-service">
+                        <option value="">Select service for Swagger UI...</option>
+                    </select>
+                </div>
+                <div id="swagger-container" class="swagger-container">
+                    <div class="swagger-placeholder">
+                        <i class="fas fa-code"></i>
+                        <h3>Swagger UI</h3>
+                        <p>Select a service to view its Swagger UI documentation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Tab -->
+            <div id="statistics-tab" class="tab-content">
+                <div class="statistics-dashboard">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="total-services">0</h3>
+                                <p>Total Services</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="total-endpoints">0</h3>
+                                <p>Total Endpoints</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-flask"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="total-tests">0</h3>
+                                <p>Tests Executed</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="success-rate">0%</h3>
+                                <p>Success Rate</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="charts-section">
+                        <div class="chart-container">
+                            <h4>Tests by Service</h4>
+                            <canvas id="tests-by-service-chart"></canvas>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <h4>Response Status Codes</h4>
+                            <canvas id="status-codes-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="recent-activity">
+                        <h4><i class="fas fa-clock"></i> Recent Test Activity</h4>
+                        <div id="recent-tests" class="recent-tests">
+                            <!-- Recent tests will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save Request Modal -->
+<div id="save-request-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Save Request</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="request-name">Request Name:</label>
+                <input type="text" id="request-name" placeholder="Enter request name">
+            </div>
+            <div class="form-group">
+                <label for="request-tags">Tags (comma-separated):</label>
+                <input type="text" id="request-tags" placeholder="api, testing, development">
+            </div>
+            <div class="form-group">
+                <label for="request-notes">Notes:</label>
+                <textarea id="request-notes" placeholder="Optional notes about this request"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="save-request-confirm" class="btn btn-primary">Save</button>
+            <button id="save-request-cancel" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Loading...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="{{ url_for('static', path='/js/api_docs.js') }}"></script>
+{% endblock %}

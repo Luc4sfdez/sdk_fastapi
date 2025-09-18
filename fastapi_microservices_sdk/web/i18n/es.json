@@ -1,0 +1,73 @@
+{
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcome": "Bienvenido al SDK de Microservicios",
+    "create_service": "Crear Servicio",
+    "available_templates": "Plantillas Disponibles",
+    "services_created": "Servicios Creados",
+    "active_services": "Servicios Activos",
+    "system_health": "Estado del Sistema"
+  },
+  "navigation": {
+    "dashboard": "Panel Principal",
+    "services": "Servicios",
+    "templates": "Plantillas",
+    "logs": "Registros",
+    "configuration": "Configuración",
+    "monitoring": "Monitoreo",
+    "documentation": "Documentación"
+  },
+  "services": {
+    "title": "Gestión de Servicios",
+    "create_new": "Crear Nuevo Servicio",
+    "name": "Nombre",
+    "port": "Puerto",
+    "status": "Estado",
+    "actions": "Acciones",
+    "start": "Iniciar",
+    "stop": "Detener",
+    "restart": "Reiniciar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view_logs": "Ver Registros"
+  },
+  "templates": {
+    "title": "Plantillas de Servicios",
+    "description": "Descripción",
+    "category": "Categoría",
+    "use_template": "Usar Plantilla",
+    "data_service": "Servicio de Datos",
+    "auth_service": "Servicio de Autenticación",
+    "api_gateway": "Gateway API",
+    "notification_service": "Servicio de Notificaciones",
+    "file_service": "Servicio de Archivos",
+    "monitoring_service": "Servicio de Monitoreo"
+  },
+  "forms": {
+    "service_name": "Nombre del Servicio",
+    "service_description": "Descripción del Servicio",
+    "select_template": "Seleccionar Plantilla",
+    "port_number": "Número de Puerto",
+    "create": "Crear",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "required": "Requerido",
+    "optional": "Opcional"
+  },
+  "messages": {
+    "service_created": "Servicio creado exitosamente",
+    "service_deleted": "Servicio eliminado",
+    "service_started": "Servicio iniciado",
+    "service_stopped": "Servicio detenido",
+    "error_occurred": "Ha ocurrido un error",
+    "confirm_delete": "¿Estás seguro de que quieres eliminar este servicio?"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "theme": "Tema",
+    "colors": "Colores",
+    "fonts": "Fuentes",
+    "save_settings": "Guardar Configuración"
+  }
+}

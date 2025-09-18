@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración - SDK Microservicios{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="fas fa-cog text-primary"></i> <span data-i18n="settings.title">Configuración</span>
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <select id="languageSelector" class="form-select me-2" style="width: auto;">
+                <option value="es">🇪🇸 Español</option>
+                <option value="en">🇺🇸 English</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Configuración de Idioma -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-language"></i> <span data-i18n="settings.language">Idioma</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label" data-i18n="settings.language">Idioma de la Interfaz</label>
+                        <select class="form-select" id="mainLanguageSelector">
+                            <option value="es">🇪🇸 Español</option>
+                            <option value="en">🇺🇸 English</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración de Tema -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-palette"></i> <span data-i18n="settings.theme">Tema</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label" data-i18n="settings.theme">Tema Visual</label>
+                        <select class="form-select" id="themeSelector">
+                            <option value="default">🌟 Por Defecto</option>
+                            <option value="dark">🌙 Oscuro</option>
+                            <option value="corporate">🏢 Corporativo</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración de Colores -->
+        <div class="col-md-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-paint-brush"></i> <span data-i18n="settings.colors">Colores Personalizados</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Color Primario</label>
+                            <input type="color" class="form-control form-control-color" id="primaryColor" value="#667eea">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Color Secundario</label>
+                            <input type="color" class="form-control form-control-color" id="secondaryColor" value="#764ba2">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Color de Acento</label>
+                            <input type="color" class="form-control form-control-color" id="accentColor" value="#ff6b6b">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Color de Éxito</label>
+                            <input type="color" class="form-control form-control-color" id="successColor" value="#1cc88a">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="applyCustomColors()">
+                        <i class="fas fa-save"></i> Aplicar Colores
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración de Fuentes -->
+        <div class="col-md-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-font"></i> <span data-i18n="settings.fonts">Fuentes</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Fuente Principal</label>
+                            <select class="form-select" id="primaryFont">
+                                <option value="'Poppins', sans-serif">Poppins</option>
+                                <option value="'Inter', sans-serif">Inter</option>
+                                <option value="'Roboto', sans-serif">Roboto</option>
+                                <option value="'Open Sans', sans-serif">Open Sans</option>
+                                <option value="'Lato', sans-serif">Lato</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Fuente Secundaria</label>
+                            <select class="form-select" id="secondaryFont">
+                                <option value="'Inter', sans-serif">Inter</option>
+                                <option value="'Poppins', sans-serif">Poppins</option>
+                                <option value="'Roboto', sans-serif">Roboto</option>
+                                <option value="'Open Sans', sans-serif">Open Sans</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Fuente Monoespaciada</label>
+                            <select class="form-select" id="monoFont">
+                                <option value="'Fira Code', monospace">Fira Code</option>
+                                <option value="'Source Code Pro', monospace">Source Code Pro</option>
+                                <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+                                <option value="'Consolas', monospace">Consolas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="applyCustomFonts()">
+                        <i class="fas fa-save"></i> Aplicar Fuentes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón Guardar General -->
+    <div class="row">
+        <div class="col-12">
+            <button class="btn btn-success btn-lg" onclick="saveAllSettings()">
+                <i class="fas fa-save"></i> <span data-i18n="settings.save_settings">Guardar Configuración</span>
+            </button>
+            <button class="btn btn-secondary btn-lg ms-2" onclick="resetSettings()">
+                <i class="fas fa-undo"></i> Restablecer
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Aplicar colores personalizados
+function applyCustomColors() {
+    const colors = {
+        primary: document.getElementById('primaryColor').value,
+        secondary: document.getElementById('secondaryColor').value,
+        accent: document.getElementById('accentColor').value,
+        success: document.getElementById('successColor').value
+    };
+    
+    if (window.themeConfig) {
+        window.themeConfig.customizeColors(colors);
+    }
+    
+    showNotification('Colores aplicados correctamente', 'success');
+}
+
+// Aplicar fuentes personalizadas
+function applyCustomFonts() {
+    const fonts = {
+        primary: document.getElementById('primaryFont').value,
+        secondary: document.getElementById('secondaryFont').value,
+        mono: document.getElementById('monoFont').value
+    };
+    
+    if (window.themeConfig) {
+        window.themeConfig.customizeFonts(fonts);
+    }
+    
+    showNotification('Fuentes aplicadas correctamente', 'success');
+}
+
+// Guardar toda la configuración
+function saveAllSettings() {
+    applyCustomColors();
+    applyCustomFonts();
+    showNotification('Configuración guardada correctamente', 'success');
+}
+
+// Restablecer configuración
+function resetSettings() {
+    localStorage.removeItem('sdk_theme');
+    localStorage.removeItem('sdk_language');
+    localStorage.removeItem('sdk_custom_colors');
+    localStorage.removeItem('sdk_custom_fonts');
+    location.reload();
+}
+
+// Mostrar notificación
+function showNotification(message, type = 'info') {
+    // Crear notificación toast
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove después de 3 segundos
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 3000);
+}
+</script>
+{% endblock %}

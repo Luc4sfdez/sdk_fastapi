@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Configuration Management - FastAPI Microservices SDK{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-cogs text-primary"></i> Configuration Management
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-success" onclick="saveConfiguration()">
+                <i class="fas fa-save"></i> Save
+            </button>
+            <button type="button" class="btn btn-info" onclick="validateConfiguration()">
+                <i class="fas fa-check-circle"></i> Validate
+            </button>
+            <button type="button" class="btn btn-warning" onclick="showHistory()">
+                <i class="fas fa-history"></i> History
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Service Selection -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-server"></i> Service Selection
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="serviceSelect" class="form-label">Select Service:</label>
+                        <select class="form-select" id="serviceSelect" onchange="loadServiceConfiguration()">
+                            <option value="">-- Select a Service --</option>
+                            <!-- Services will be loaded dynamically -->
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="schemaSelect" class="form-label">Configuration Schema:</label>
+                        <select class="form-select" id="schemaSelect" onchange="loadSchema()">
+                            <option value="">-- Select Schema --</option>
+                            <!-- Schemas will be loaded dynamically -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Configuration Editor -->
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-edit"></i> Configuration Editor
+                </h6>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-outline-secondary" onclick="setEditorMode('json')">JSON</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="setEditorMode('yaml')">YAML</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="setEditorMode('form')">Form</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- JSON/YAML Editor -->
+                <div id="textEditor" style="display: block;">
+                    <textarea id="configEditor" class="form-control" rows="20" placeholder="Enter your configuration here..."></textarea>
+                </div>
+                
+                <!-- Form Editor -->
+                <div id="formEditor" style="display: none;">
+                    <div id="configForm">
+                        <!-- Dynamic form will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Validation and Info Panel -->
+    <div class="col-lg-4">
+        <!-- Validation Results -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-success">
+                    <i class="fas fa-check-circle"></i> Validation Status
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="validationResults">
+                    <div class="text-muted text-center">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Click "Validate" to check your configuration</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Schema Information -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-info">
+                    <i class="fas fa-info"></i> Schema Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="schemaInfo">
+                    <div class="text-muted text-center">
+                        <i class="fas fa-file-alt"></i>
+                        <p>Select a schema to view information</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Templates -->
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-warning">
+                    <i class="fas fa-layer-group"></i> Templates
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="templatesList">
+                    <div class="text-muted text-center">
+                        <i class="fas fa-templates"></i>
+                        <p>Loading templates...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Configuration History Modal -->
+<div class="modal fade" id="historyModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-history"></i> Configuration History
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="historyContent">
+                    <!-- History will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Configuration Diff Modal -->
+<div class="modal fade" id="diffModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-code-branch"></i> Configuration Diff
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="diffContent">
+                    <!-- Diff will be shown here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+<link rel="stylesheet" href="/static/css/configuration.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/yaml/yaml.min.js"></script>
+<script src="/static/js/configuration.js"></script>
+{% endblock %}

@@ -1,0 +1,290 @@
+/* Configuration Management Styles */
+
+.configuration-editor {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.configuration-editor .CodeMirror {
+    height: 500px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.configuration-editor .CodeMirror-scroll {
+    min-height: 500px;
+}
+
+.validation-success {
+    border-left: 4px solid #28a745;
+    background-color: #d4edda;
+}
+
+.validation-error {
+    border-left: 4px solid #dc3545;
+    background-color: #f8d7da;
+}
+
+.validation-warning {
+    border-left: 4px solid #ffc107;
+    background-color: #fff3cd;
+}
+
+.schema-field-required {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.schema-field-optional {
+    color: #6c757d;
+}
+
+.template-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.template-item:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+    transform: translateY(-1px);
+}
+
+.config-form-field {
+    margin-bottom: 1rem;
+}
+
+.config-form-field label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.config-form-field .form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.history-entry {
+    border-left: 3px solid #007bff;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.history-entry:hover {
+    background-color: #f8f9fa;
+}
+
+.diff-viewer {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.diff-added {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.diff-removed {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.diff-unchanged {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.editor-mode-buttons .btn {
+    border-radius: 0;
+}
+
+.editor-mode-buttons .btn:first-child {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+}
+
+.editor-mode-buttons .btn:last-child {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+
+.editor-mode-buttons .btn.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.configuration-sidebar {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.configuration-sidebar .card {
+    margin-bottom: 1rem;
+}
+
+.configuration-sidebar .card-body {
+    padding: 1rem;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    max-width: 500px;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.service-selector {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.service-selector .form-label {
+    color: white;
+    font-weight: 600;
+}
+
+.service-selector .form-select {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 0.375rem;
+}
+
+.config-actions {
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+    background: white;
+    padding: 1rem 0;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.config-status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.config-status-valid {
+    background-color: #28a745;
+}
+
+.config-status-invalid {
+    background-color: #dc3545;
+}
+
+.config-status-unknown {
+    background-color: #6c757d;
+}
+
+.json-key {
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.json-string {
+    color: #009900;
+}
+
+.json-number {
+    color: #cc6600;
+}
+
+.json-boolean {
+    color: #990099;
+}
+
+.json-null {
+    color: #999999;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.config-breadcrumb {
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.config-breadcrumb .breadcrumb-item {
+    color: #6c757d;
+}
+
+.config-breadcrumb .breadcrumb-item.active {
+    color: #495057;
+    font-weight: 600;
+}
+
+.config-help-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-style: italic;
+    margin-top: 0.5rem;
+}
+
+.config-example {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.config-version-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.config-timestamp {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
