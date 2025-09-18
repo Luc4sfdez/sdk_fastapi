@@ -1,0 +1,2031 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Integral de Gestión - Certificados, Incidencias y Expedientes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 500px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-purple {
+            background: #9b59b6;
+        }
+
+        .btn-purple:hover {
+            background: #8e44ad;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .info-panel {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            .certificate {
+                page-break-after: always;
+                margin: 0;
+                box-shadow: none;
+            }
+            
+            .incidencia-report {
+                page-break-after: always;
+                margin: 0;
+                box-shadow: none;
+            }
+        }
+
+        /* Estilos específicos para incidencias */
+        .incidencia-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .incidencia-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .incidencia-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .incidencia-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .incidencia-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .incidencia-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .attachment-folder {
+            background: #fff8e1;
+            border: 2px dashed #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 6px;
+            border-left: 3px solid #ffc107;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .file-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .file-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .mini-btn {
+            width: 25px;
+            height: 25px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-mini {
+            background: #3498db;
+            color: white;
+        }
+
+        .delete-mini {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* Estilos para certificados */
+        .certificate {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e6f2ff 100%);
+            border: 3px solid #3498db;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            page-break-inside: avoid;
+        }
+
+        .certificate-header {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .certificate-title {
+            font-size: 2.5rem;
+            color: #3498db;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .certificate-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .certificate-body {
+            margin: 30px 0;
+            line-height: 2;
+        }
+
+        .student-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3498db;
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .course-info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .certificate-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #3498db;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .signature-line {
+            border-top: 2px solid #333;
+            width: 200px;
+            padding-top: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Estilos para WhatsApp */
+        .whatsapp-item {
+            background: white;
+            border-left: 4px solid #25d366;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .whatsapp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .whatsapp-badge {
+            background: #dcf8c6;
+            color: #075e54;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .matricula-badge {
+            background: #3498db;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 0 3px;
+        }
+
+        /* Estilos para expedientes */
+        .expediente-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .expediente-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 20px;
+        }
+
+        .documents-panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .panel-header {
+            background: #34495e;
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .checklist {
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .document-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .document-item.completed {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .document-item.client {
+            border-right: 4px solid #17a2b8;
+        }
+
+        .document-item.taller {
+            border-right: 4px solid #ffc107;
+        }
+
+        .document-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .document-text {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .document-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 10px;
+        }
+
+        .badge-client {
+            background: #bee5eb;
+            color: #0c5460;
+        }
+
+        .badge-taller {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .document-files {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .attached-file {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #3498db;
+        }
+
+        .file-actions-mini {
+            display: flex;
+            gap: 5px;
+        }
+
+        .files-panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .drop-zone {
+            border: 3px dashed #3498db;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .drop-zone.dragover {
+            border-color: #2980b9;
+            background: #e3f2fd;
+            transform: scale(1.02);
+        }
+
+        .drop-zone-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+
+        .pending-files {
+            padding: 20px;
+        }
+
+        .pending-file {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+        }
+
+        .pending-file-info {
+            flex: 1;
+            margin-right: 15px;
+        }
+
+        .pending-file-name {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .pending-file-size {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .document-selector {
+            min-width: 200px;
+            margin-right: 10px;
+        }
+
+        .document-selector select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+        }
+
+        .assign-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .assign-btn:hover {
+            background: #218838;
+        }
+
+        .discard-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-left: 5px;
+        }
+
+        .discard-btn:hover {
+            background: #c82333;
+        }
+
+        .progress-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #27ae60;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        /* Estilos para informes de incidencias */
+        .incidencia-report {
+            background: white;
+            padding: 30px;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 20px;
+        }
+
+        .report-title {
+            font-size: 2rem;
+            color: #3498db;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .report-client-info {
+            margin: 15px 0;
+            font-size: 1.1rem;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .report-table th {
+            background: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .report-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .report-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .expediente-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .pending-file {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .document-selector {
+                min-width: auto;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Sistema Integral de Gestión</h1>
+            <p>Gestión de certificados, incidencias técnicas y documentación de expedientes</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('certificados')">
+                📜 Certificados
+            </button>
+            <button class="tab" onclick="showTab('incidencias')">
+                🛠️ Incidencias
+            </button>
+            <button class="tab" onclick="showTab('whatsapp')">
+                💬 WhatsApp
+            </button>
+            <button class="tab" onclick="showTab('expedientes')">
+                🗂️ Expedientes
+            </button>
+        </div>
+
+        <div class="content">
+            <!-- CERTIFICADOS -->
+            <div id="certificados" class="tab-content">
+                <div class="info-panel">
+                    <h3>📋 Generador de Certificados</h3>
+                    <p>Completa todos los campos para generar certificados profesionales</p>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="courseName">Nombre del Curso:</label>
+                        <input type="text" id="courseName" placeholder="Ej: Curso de Programación Web">
+                    </div>
+                    <div class="form-group">
+                        <label for="courseHours">Duración (horas):</label>
+                        <input type="text" id="courseHours" placeholder="Ej: 40">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">Fecha de Inicio:</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">Fecha de Fin:</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="instructor">Instructor:</label>
+                        <input type="text" id="instructor" placeholder="Nombre del instructor">
+                    </div>
+                    <div class="form-group">
+                        <label for="emissionDate">📅 Fecha de Emisión:</label>
+                        <input type="date" id="emissionDate">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="studentList">Lista de Estudiantes:</label>
+                    <small style="color: #666; margin-bottom: 8px; display: block;">
+                        🔍 Formatos válidos: <strong>Nombre - Matrícula</strong> • <strong>Matrícula - Nombre</strong> • <strong>Nombre, Matrícula</strong> • <strong>Nombre: Matrícula</strong> • <strong>Nombre Matrícula</strong> • Acepta matrículas con letras y números
+                    </small>
+                    <textarea id="studentList" rows="8" placeholder="Formatos aceptados (uno por línea):
+Juan Pérez - 12345
+12345 - María García  
+Carlos López 34567
+Ana Martínez, 45678
+Pedro Ruiz: 56789
+Francisco Quiles - 3773LNV"></textarea>
+                </div>
+                
+                <button class="btn" onclick="generateCertificates()">🎓 Generar Certificados</button>
+                <button class="btn btn-success" onclick="exportCertificates()" style="display:none;" id="exportCertBtn">💾 Exportar Certificados</button>
+                <button class="btn btn-warning" onclick="generatePDFCertificates()" style="display:none;" id="pdfCertBtn">📄 Generar PDF</button>
+                
+                <div id="certificatesResults"></div>
+            </div>
+
+            <!-- INCIDENCIAS -->
+            <div id="incidencias" class="tab-content hidden">
+                <div class="info-panel">
+                    <h3>🛠️ Registro de Incidencias Técnicas</h3>
+                    <p>Gestiona las solicitudes de ayuda de tus clientes de forma persistente</p>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expedienteNum">Nº de Expediente:</label>
+                        <input type="text" id="expedienteNum" placeholder="Ej: EXP-2024-001">
+                    </div>
+                    <div class="form-group">
+                        <label for="clienteName">Cliente:</label>
+                        <input type="text" id="clienteName" placeholder="Nombre del cliente">
+                    </div>
+                </div>
+                
+                <div class="incidencia-grid">
+                    <div class="form-group">
+                        <label for="incidenciaFecha">📅 Fecha:</label>
+                        <input type="date" id="incidenciaFecha">
+                    </div>
+                    <div class="form-group">
+                        <label for="incidenciaMatricula">🎓 Matrícula:</label>
+                        <input type="text" id="incidenciaMatricula" placeholder="Matrícula del vehículo">
+                    </div>
+                    <div class="form-group">
+                        <label for="incidenciaTipo">📞 Tipo de Contacto:</label>
+                        <select id="incidenciaTipo">
+                            <option value="llamada">Llamada Telefónica</option>
+                            <option value="correo">Correo Electrónico</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="presencial">Presencial</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="incidenciaObservaciones">📝 Observaciones:</label>
+                    <textarea id="incidenciaObservaciones" rows="4" placeholder="Detalles de la incidencia..."></textarea>
+                </div>
+                
+                <button class="btn" onclick="addIncidencia()">➕ Registrar Incidencia</button>
+                <button class="btn btn-success" onclick="exportIncidencias()">💾 Exportar Incidencias</button>
+                <button class="btn btn-warning" onclick="generateIncidenciaReport()">📋 Generar Informe</button>
+                <button class="btn btn-purple" onclick="generatePDFIncidencias()">📄 Generar PDF</button>
+                
+                <div id="incidenciasResults"></div>
+            </div>
+
+            <!-- WHATSAPP -->
+            <div id="whatsapp" class="tab-content hidden">
+                <div class="info-panel">
+                    <h3>💬 Procesador de Conversaciones WhatsApp</h3>
+                    <p>Pega el texto exportado de WhatsApp para generar un registro de incidencias</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="whatsappText">Conversación de WhatsApp:</label>
+                    <textarea id="whatsappText" rows="10" placeholder="Pega aquí el texto exportado de WhatsApp:
+
+15/1/24, 10:30 - Juan Técnico: Problema con matrícula 12345
+15/1/24, 10:32 - Cliente: No puedo acceder al sistema  
+15/1/24, 10:35 - Juan Técnico: Revisando matricula 12345, error de conexión"></textarea>
+                </div>
+                
+                <button class="btn btn-purple" onclick="processWhatsApp()">🔍 Procesar Conversación</button>
+                <button class="btn btn-success" onclick="exportWhatsAppIncidencias()" style="display:none;" id="exportIncBtn">💾 Exportar Incidencias</button>
+                
+                <div id="whatsappResults"></div>
+            </div>
+
+            <!-- EXPEDIENTES -->
+            <div id="expedientes" class="tab-content hidden">
+                <div class="info-panel">
+                    <h3>🗂️ Gestor de Expedientes</h3>
+                    <p>Sistema de gestión de documentación para subvenciones de tacógrafos</p>
+                </div>
+
+                <div class="expediente-selector">
+                    <div class="expediente-info">
+                        <div class="form-group">
+                            <label for="expClienteNombre">Nombre del Cliente:</label>
+                            <input type="text" id="expClienteNombre" placeholder="Ej: Transportes García SL">
+                        </div>
+                        <div class="form-group">
+                            <label for="expNumeroExpediente">Número de Expediente:</label>
+                            <input type="text" id="expNumeroExpediente" placeholder="Ej: EXP-2025-001">
+                        </div>
+                        <div class="form-group">
+                            <label for="expFechaInicio">Fecha de Inicio:</label>
+                            <input type="date" id="expFechaInicio">
+                        </div>
+                        <div class="form-group">
+                            <label for="expImporteSubvencion">Importe Subvención (€):</label>
+                            <input type="number" id="expImporteSubvencion" placeholder="Ej: 5000">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="createExpediente()">📁 Crear/Actualizar Expediente</button>
+                    <button class="btn btn-success" onclick="exportExpediente()">💾 Exportar Expediente</button>
+                </div>
+
+                <div class="progress-summary" id="progressSummary">
+                    <h3>📊 Estado del Expediente</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="completedCount">0</div>
+                            <div class="stat-label">Completados</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="totalCount">14</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="progressPercent">0%</div>
+                            <div class="stat-label">Progreso</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="main-content">
+                    <div class="documents-panel">
+                        <div class="panel-header">
+                            <h3>📋 Documentación Requerida</h3>
+                            <span id="checklistProgress">0/14</span>
+                        </div>
+
+                        <div class="checklist" id="documentChecklist">
+                            <!-- La lista se generará dinámicamente -->
+                        </div>
+                    </div>
+
+                    <div class="files-panel">
+                        <div class="panel-header">
+                            <h3>📎 Archivos del Expediente</h3>
+                            <span id="fileCount">0 archivos asignados</span>
+                        </div>
+
+                        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                            <div class="drop-zone-icon">📁</div>
+                            <h3>Arrastra archivos aquí</h3>
+                            <p>o haz clic para seleccionar</p>
+                            <small>Soporta: PDF, DOC, DOCX, JPG, PNG, Excel</small>
+                        </div>
+
+                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" style="display: none;">
+
+                        <div class="pending-files" id="pendingFiles">
+                            <!-- Archivos pendientes de asignar aparecerán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para visualizar archivos -->
+    <div id="fileModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="fileViewer"></div>
+        </div>
+    </div>
+
+    <!-- Modal para informes -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeReportModal()">&times;</span>
+            <div id="reportViewer"></div>
+        </div>
+    </div>
+
+    <script>
+        // Datos persistentes
+        let certificates = JSON.parse(localStorage.getItem('certificates')) || [];
+        let incidencias = JSON.parse(localStorage.getItem('incidencias')) || [];
+        let attachments = JSON.parse(localStorage.getItem('attachments')) || [];
+        let whatsappIncidencias = JSON.parse(localStorage.getItem('whatsappIncidencias')) || [];
+        let currentExpediente = JSON.parse(localStorage.getItem('currentExpediente')) || {
+            cliente: '',
+            numero: '',
+            fecha: '',
+            importe: 0,
+            documents: {}
+        };
+
+        const requiredDocuments = [
+            { id: 'factura', text: 'Factura que contenga todas las actuaciones financiadas, incluyendo la factura del sistema de tacógrafo inteligente de segunda generación', type: 'general' },
+            { id: 'certificacion', text: 'Certificación de superación del curso por parte de los asistentes', type: 'general' },
+            { id: 'informe', text: 'Informe en el que se incluya una descripción del número de incidencias y/o dudas atendidas', type: 'general' },
+            { id: 'resolucion_subvencion', text: 'Resolución de la subvención concedida', type: 'client' },
+            { id: 'cheque', text: 'Cheque Original (con la firma habilitada del órgano emisor, no copia ni escaneo)', type: 'client' },
+            { id: 'resolucion_ministerio', text: 'Resolución del Ministerio de Transportes que reconozca el carácter de Proveedor de Soluciones de Modernización', type: 'taller' },
+            { id: 'licencia_software', text: 'Licencia del software instalado (TIS Web)', type: 'general' },
+            { id: 'justificante_abono', text: 'Justificante de abono de la parte no subvencionada con fecha igual o posterior a la fecha de la factura', type: 'general' },
+            { id: 'publicidad', text: 'Publicidad (página web o fotos de camiones con cartel de publicidad)', type: 'client' },
+            { id: 'certificado_cuenta', text: 'Certificado de titularidad de cuenta corriente', type: 'taller' },
+            { id: 'cert_seg_social', text: 'Certificado estar al corriente Seguridad Social', type: 'taller' },
+            { id: 'cert_aeat', text: 'Certificado estar al corriente AEAT', type: 'taller' },
+            { id: 'cert_atv', text: 'Certificado estar al corriente ATV', type: 'taller' },
+            { id: 'cert_proper', text: 'Certificado alta PROPER', type: 'taller' }
+        ];
+
+        // Inicializar fechas y datos
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('endDate').value = today;
+            document.getElementById('emissionDate').value = today;
+            document.getElementById('incidenciaFecha').value = today;
+            document.getElementById('expFechaInicio').value = today;
+            
+            // Mostrar datos iniciales
+            if (certificates.length > 0) {
+                displayCertificates();
+                document.getElementById('exportCertBtn').style.display = 'inline-block';
+                document.getElementById('pdfCertBtn').style.display = 'inline-block';
+            }
+            displayIncidencias();
+            displayAttachments();
+            initializeChecklist();
+        });
+
+        // Navegación entre pestañas
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.remove('hidden');
+            event.target.classList.add('active');
+        }
+
+        // CERTIFICADOS
+        function generateCertificates() {
+            const courseName = document.getElementById('courseName').value;
+            const courseHours = document.getElementById('courseHours').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const instructor = document.getElementById('instructor').value;
+            const emissionDate = document.getElementById('emissionDate').value;
+            const studentList = document.getElementById('studentList').value;
+
+            if (!courseName || !studentList) {
+                alert('Por favor, completa al menos el nombre del curso y la lista de estudiantes');
+                return;
+            }
+
+            certificates = [];
+            const lines = studentList.trim().split('\n').filter(line => line.trim());
+            const fechaEmision = emissionDate ? new Date(emissionDate).toLocaleDateString('es-ES') : new Date().toLocaleDateString('es-ES');
+            
+            lines.forEach(line => {
+                let nombre = '';
+                let matricula = '';
+                line = line.trim();
+                
+                const patterns = [
+                    /^(.+?)\s*[-–—]\s*([A-Z0-9]+)$/i,
+                    /^([A-Z0-9]+)\s*[-–—]\s*(.+)$/i,
+                    /^(.+?)\s+([A-Z0-9]{4,})$/i,
+                    /^([A-Z0-9]{4,})\s+(.+)$/i,
+                    /^(.+?),\s*([A-Z0-9]+)$/i,
+                    /^([A-Z0-9]+),\s*(.+)$/i,
+                    /^(.+?)\s*:\s*([A-Z0-9]+)$/i,
+                    /^([A-Z0-9]+)\s*:\s*(.+)$/i,
+                ];
+                
+                for (const pattern of patterns) {
+                    const match = line.match(pattern);
+                    if (match) {
+                        const [, parte1, parte2] = match;
+                        if (/^[A-Z0-9]+$/i.test(parte1.trim())) {
+                            matricula = parte1.trim().toUpperCase();
+                            nombre = parte2.trim();
+                        } else {
+                            nombre = parte1.trim();
+                            matricula = parte2.trim().toUpperCase();
+                        }
+                        break;
+                    }
+                }
+                
+                if (!nombre && !matricula) {
+                    const words = line.split(/\s+/);
+                    for (let i = 0; i < words.length; i++) {
+                        if (/^[A-Z0-9]{4,}$/i.test(words[i])) {
+                            matricula = words[i].toUpperCase();
+                            nombre = words.filter((word, index) => index !== i).join(' ');
+                            break;
+                        }
+                    }
+                }
+                
+                if (nombre && matricula && nombre.length > 1 && matricula.length >= 3) {
+                    certificates.push({
+                        nombre: nombre.trim(),
+                        matricula: matricula.trim(),
+                        fecha: fechaEmision,
+                        courseName,
+                        courseHours,
+                        startDate: startDate ? new Date(startDate).toLocaleDateString('es-ES') : '',
+                        endDate: endDate ? new Date(endDate).toLocaleDateString('es-ES') : '',
+                        instructor
+                    });
+                }
+            });
+
+            if (certificates.length === 0) {
+                alert('❌ No se pudieron procesar los estudiantes.\n\n✅ Formatos válidos:\n• Juan Pérez - 12345\n• 12345 - Juan Pérez\n• Juan Pérez 12345\n• Juan Pérez, 12345\n• Juan Pérez: 12345\n• Francisco Quiles - 3773LNV\n\n💡 Matrículas pueden tener números y letras');
+                return;
+            }
+
+            localStorage.setItem('certificates', JSON.stringify(certificates));
+            displayCertificates();
+            document.getElementById('exportCertBtn').style.display = 'inline-block';
+            document.getElementById('pdfCertBtn').style.display = 'inline-block';
+        }
+
+        function displayCertificates() {
+            const resultsDiv = document.getElementById('certificatesResults');
+            let html = '<div class="results">';
+            html += `<div class="result-header">`;
+            html += `<h3>🎓 Certificados Generados (${certificates.length})</h3>`;
+            html += `<button class="btn no-print" onclick="window.print()">🖨️ Imprimir Todo</button>`;
+            html += `</div>`;
+
+            certificates.forEach((cert, index) => {
+                html += `
+                <div class="certificate">
+                    <div class="certificate-header">
+                        <div class="certificate-title">Certificado de Aprovechamiento</div>
+                        <div class="certificate-subtitle">Se certifica que</div>
+                    </div>
+                    
+                    <div class="certificate-body">
+                        <div class="student-name">${cert.nombre}</div>
+                        <div style="margin: 10px 0; color: #666; font-size: 14px;">
+                            Matrícula: <strong>${cert.matricula}</strong>
+                        </div>
+                        
+                        <div class="course-info">
+                            <p style="font-size: 18px; margin-bottom: 15px;">
+                                Ha completado satisfactoriamente el curso:
+                            </p>
+                            <div style="font-size: 24px; font-weight: bold; color: #3498db; margin: 15px 0;">
+                                ${cert.courseName}
+                            </div>
+                            ${cert.courseHours ? `<p>Con una duración de <strong>${cert.courseHours} horas académicas</strong></p>` : ''}
+                            ${cert.startDate && cert.endDate ? `<p>Realizado del <strong>${cert.startDate}</strong> al <strong>${cert.endDate}</strong></p>` : ''}
+                            ${cert.instructor ? `<p>Instructor: <strong>${cert.instructor}</strong></p>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="certificate-footer">
+                        <div style="text-align: center; flex: 1;">
+                            <div style="font-size: 14px; color: #666;">
+                                Fecha de emisión: <strong>${cert.fecha}</strong>
+                            </div>
+                        </div>
+                        <div class="signature-line">
+                            Firma y Sello
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+
+        function exportCertificates() {
+            if (certificates.length === 0) return;
+            
+            const emissionDate = document.getElementById('emissionDate').value;
+            const fechaEmisionTexto = emissionDate ? new Date(emissionDate).toLocaleDateString('es-ES') : new Date().toLocaleDateString('es-ES');
+            
+            let exportText = `CERTIFICADOS DE APROVECHAMIENTO - ${certificates[0].courseName}\n`;
+            exportText += `========================================\n`;
+            exportText += `Curso: ${certificates[0].courseName}\n`;
+            exportText += `Duración: ${certificates[0].courseHours} horas\n`;
+            exportText += `Período: ${certificates[0].startDate} - ${certificates[0].endDate}\n`;
+            exportText += `Instructor: ${certificates[0].instructor}\n`;
+            exportText += `Fecha de emisión: ${fechaEmisionTexto}\n`;
+            exportText += `Fecha de generación: ${new Date().toLocaleDateString('es-ES')}\n\n`;
+            
+            certificates.forEach((cert, index) => {
+                exportText += `${index + 1}. CERTIFICADO DE APROVECHAMIENTO\n`;
+                exportText += `   Nombre: ${cert.nombre}\n`;
+                exportText += `   Matrícula: ${cert.matricula}\n`;
+                exportText += `   Fecha de emisión: ${cert.fecha}\n`;
+                exportText += `   ----------------------------\n\n`;
+            });
+            
+            downloadFile(`certificados-${new Date().toISOString().split('T')[0]}.txt`, exportText);
+        }
+
+        function generatePDFCertificates() {
+            if (certificates.length === 0) return;
+            
+            let pdfContent = `CERTIFICADOS DE APROVECHAMIENTO\n`;
+            pdfContent += `=============================\n\n`;
+            pdfContent += `Curso: ${certificates[0].courseName}\n`;
+            pdfContent += `Duración: ${certificates[0].courseHours} horas\n`;
+            pdfContent += `Período: ${certificates[0].startDate} - ${certificates[0].endDate}\n`;
+            pdfContent += `Instructor: ${certificates[0].instructor}\n`;
+            pdfContent += `Fecha de emisión: ${certificates[0].fecha}\n\n`;
+            
+            pdfContent += `ESTUDIANTES CERTIFICADOS:\n`;
+            pdfContent += `========================\n\n`;
+            
+            certificates.forEach((cert, index) => {
+                pdfContent += `${index + 1}. ${cert.nombre} - Matrícula: ${cert.matricula}\n`;
+            });
+            
+            downloadFile(`certificados-${new Date().toISOString().split('T')[0]}.pdf`, pdfContent);
+        }
+
+        // INCIDENCIAS
+        function addIncidencia() {
+            const expediente = document.getElementById('expedienteNum').value;
+            const cliente = document.getElementById('clienteName').value;
+            const fecha = document.getElementById('incidenciaFecha').value;
+            const matricula = document.getElementById('incidenciaMatricula').value;
+            const tipo = document.getElementById('incidenciaTipo').value;
+            const observaciones = document.getElementById('incidenciaObservaciones').value;
+
+            if (!expediente || !cliente || !fecha) {
+                alert('Por favor, completa al menos expediente, cliente y fecha');
+                return;
+            }
+
+            const incidencia = {
+                id: Date.now() + Math.random(),
+                expediente: expediente,
+                cliente: cliente,
+                fecha: fecha,
+                matricula: matricula,
+                tipo: tipo,
+                observaciones: observaciones,
+                timestamp: new Date().toISOString()
+            };
+
+            incidencias.push(incidencia);
+            localStorage.setItem('incidencias', JSON.stringify(incidencias));
+            
+            // Limpiar formulario
+            document.getElementById('incidenciaMatricula').value = '';
+            document.getElementById('incidenciaObservaciones').value = '';
+            
+            displayIncidencias();
+        }
+
+        function displayIncidencias() {
+            const resultsDiv = document.getElementById('incidenciasResults');
+            
+            if (incidencias.length === 0) {
+                resultsDiv.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">📝 No hay incidencias registradas</div>';
+                return;
+            }
+
+            let html = '<div class="results">';
+            html += `<div class="result-header">`;
+            html += `<h3>🛠️ Incidencias Registradas (${incidencias.length})</h3>`;
+            html += `</div>`;
+
+            html += `<table class="incidencia-table">
+                <thead>
+                    <tr>
+                        <th>Expediente</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Matrícula</th>
+                        <th>Tipo</th>
+                        <th>Observaciones</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            incidencias.forEach(inc => {
+                html += `
+                <tr>
+                    <td><strong>${inc.expediente}</strong></td>
+                    <td>${inc.cliente}</td>
+                    <td>${new Date(inc.fecha).toLocaleDateString('es-ES')}</td>
+                    <td>${inc.matricula || '-'}</td>
+                    <td>${getTipoLabel(inc.tipo)}</td>
+                    <td style="max-width: 300px;">${inc.observaciones || '-'}</td>
+                    <td>
+                        <button class="mini-btn delete-mini" onclick="deleteIncidencia('${inc.id}')" title="Eliminar">🗑️</button>
+                    </td>
+                </tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+            resultsDiv.innerHTML = html;
+        }
+
+        function getTipoLabel(tipo) {
+            const labels = {
+                'llamada': '📞 Llamada',
+                'correo': '📧 Correo',
+                'whatsapp': '💬 WhatsApp',
+                'presencial': '👤 Presencial'
+            };
+            return labels[tipo] || tipo;
+        }
+
+        function deleteIncidencia(id) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta incidencia?')) {
+                incidencias = incidencias.filter(inc => inc.id != id);
+                localStorage.setItem('incidencias', JSON.stringify(incidencias));
+                displayIncidencias();
+            }
+        }
+
+        function exportIncidencias() {
+            if (incidencias.length === 0) {
+                alert('No hay incidencias para exportar');
+                return;
+            }
+
+            let exportText = `REGISTRO DE INCIDENCIAS TÉCNICAS\n`;
+            exportText += `========================================\n`;
+            exportText += `Total de incidencias: ${incidencias.length}\n`;
+            exportText += `Fecha de exportación: ${new Date().toLocaleDateString('es-ES')}\n\n`;
+
+            incidencias.forEach((inc, index) => {
+                exportText += `${index + 1}. INCIDENCIA\n`;
+                exportText += `   Expediente: ${inc.expediente}\n`;
+                exportText += `   Cliente: ${inc.cliente}\n`;
+                exportText += `   Fecha: ${new Date(inc.fecha).toLocaleDateString('es-ES')}\n`;
+                exportText += `   Matrícula: ${inc.matricula || 'No especificada'}\n`;
+                exportText += `   Tipo: ${getTipoLabel(inc.tipo)}\n`;
+                exportText += `   Observaciones: ${inc.observaciones || 'Sin observaciones'}\n`;
+                exportText += `   ----------------------------\n\n`;
+            });
+
+            downloadFile(`incidencias-${new Date().toISOString().split('T')[0]}.txt`, exportText);
+        }
+
+        function generateIncidenciaReport() {
+            if (incidencias.length === 0) {
+                alert('No hay incidencias para generar informe');
+                return;
+            }
+
+            // Agrupar incidencias por cliente
+            const clientes = {};
+            incidencias.forEach(inc => {
+                if (!clientes[inc.cliente]) {
+                    clientes[inc.cliente] = [];
+                }
+                clientes[inc.cliente].push(inc);
+            });
+
+            let html = '';
+            Object.keys(clientes).forEach(cliente => {
+                const clienteIncidencias = clientes[cliente];
+                html += `<div class="incidencia-report">
+                    <div class="report-header">
+                        <div class="report-title">Informe de Incidencias Técnicas</div>
+                        <div class="report-client-info">
+                            <strong>Cliente:</strong> ${cliente} | 
+                            <strong>Total Incidencias:</strong> ${clienteIncidencias.length}
+                        </div>
+                    </div>
+                    
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Expediente</th>
+                                <th>Matrícula</th>
+                                <th>Tipo</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                clienteIncidencias.forEach(inc => {
+                    html += `
+                    <tr>
+                        <td>${new Date(inc.fecha).toLocaleDateString('es-ES')}</td>
+                        <td>${inc.expediente}</td>
+                        <td>${inc.matricula || '-'}</td>
+                        <td>${getTipoLabel(inc.tipo)}</td>
+                        <td>${inc.observaciones || '-'}</td>
+                    </tr>`;
+                });
+
+                html += `</tbody></table>
+                    <div style="text-align: right; margin-top: 20px; color: #666;">
+                        Generado: ${new Date().toLocaleDateString('es-ES')}
+                    </div>
+                </div>`;
+            });
+
+            document.getElementById('reportViewer').innerHTML = html;
+            document.getElementById('reportModal').style.display = 'block';
+        }
+
+        function generatePDFIncidencias() {
+            if (incidencias.length === 0) {
+                alert('No hay incidencias para generar PDF');
+                return;
+            }
+
+            let pdfContent = `INFORME DE INCIDENCIAS TÉCNICAS\n`;
+            pdfContent += `=============================\n\n`;
+            pdfContent += `Fecha de generación: ${new Date().toLocaleDateString('es-ES')}\n\n`;
+            
+            pdfContent += `INCIDENCIAS REGISTRADAS:\n`;
+            pdfContent += `======================\n\n`;
+            
+            incidencias.forEach((inc, index) => {
+                pdfContent += `${index + 1}. Expediente: ${inc.expediente}\n`;
+                pdfContent += `   Cliente: ${inc.cliente}\n`;
+                pdfContent += `   Fecha: ${new Date(inc.fecha).toLocaleDateString('es-ES')}\n`;
+                pdfContent += `   Matrícula: ${inc.matricula || 'No especificada'}\n`;
+                pdfContent += `   Tipo: ${getTipoLabel(inc.tipo)}\n`;
+                pdfContent += `   Observaciones: ${inc.observaciones || 'Sin observaciones'}\n\n`;
+            });
+
+            downloadFile(`incidencias-${new Date().toISOString().split('T')[0]}.pdf`, pdfContent);
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').style.display = 'none';
+        }
+
+        // ADJUNTOS
+        function displayAttachments() {
+            const container = document.getElementById('pendingFiles');
+            if (!container) return; // Solo en la sección de expedientes
+            
+            let html = '<h4 style="margin-bottom: 15px; color: #856404;">📎 Carpeta de Documentos:</h4>';
+            
+            if (attachments.length === 0) {
+                html += '<p style="color: #999;">No hay archivos adjuntos</p>';
+                container.innerHTML = html;
+                return;
+            }
+
+            attachments.forEach(file => {
+                html += `
+                <div class="attachment-item">
+                    <div class="file-icon">${getFileIcon(file.name)}</div>
+                    <div class="file-info">
+                        <div style="font-weight: 600;">${file.name}</div>
+                        <div style="font-size: 12px; color: #666;">${formatFileSize(file.size)} • ${new Date(file.timestamp).toLocaleDateString('es-ES')}</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="mini-btn view-mini" onclick="viewAttachment('${file.id}')" title="Ver">👁️</button>
+                        <button class="mini-btn delete-mini" onclick="deleteAttachment('${file.id}')" title="Eliminar">🗑️</button>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function getFileIcon(filename) {
+            const extension = filename.split('.').pop().toLowerCase();
+            if (['pdf'].includes(extension)) return '📋';
+            if (['doc', 'docx'].includes(extension)) return '📝';
+            if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) return '🖼️';
+            if (['xls', 'xlsx'].includes(extension)) return '📊';
+            return '📄';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function viewAttachment(id) {
+            const file = attachments.find(f => f.id == id);
+            if (file) {
+                alert(`📎 ${file.name}\n\nTamaño: ${formatFileSize(file.size)}\nFecha: ${new Date(file.timestamp).toLocaleDateString('es-ES')}\n\n(Vista previa no disponible en esta demo)`);
+            }
+        }
+
+        function deleteAttachment(id) {
+            if (confirm('¿Estás seguro de que quieres eliminar este archivo?')) {
+                attachments = attachments.filter(f => f.id != id);
+                localStorage.setItem('attachments', JSON.stringify(attachments));
+                displayAttachments();
+            }
+        }
+
+        // Drag & Drop para expedientes
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!dropZone || !fileInput) return;
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                const files = Array.from(e.dataTransfer.files);
+                handleFiles(files);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                handleFiles(files);
+            });
+        }
+
+        function handleFiles(files) {
+            files.forEach(file => {
+                if (file.size > 50 * 1024 * 1024) { // 50MB limit
+                    alert(`El archivo ${file.name} es demasiado grande (máximo 50MB)`);
+                    return;
+                }
+
+                const fileObj = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    file: file,
+                    timestamp: new Date().toISOString()
+                };
+
+                attachments.push(fileObj);
+            });
+
+            localStorage.setItem('attachments', JSON.stringify(attachments));
+            displayAttachments();
+        }
+
+        // EXPEDIENTES
+        function createExpediente() {
+            const cliente = document.getElementById('expClienteNombre').value;
+            const numero = document.getElementById('expNumeroExpediente').value;
+            const fecha = document.getElementById('expFechaInicio').value;
+            const importe = document.getElementById('expImporteSubvencion').value;
+
+            if (!cliente || !numero) {
+                alert('Por favor, completa al menos el nombre del cliente y número de expediente');
+                return;
+            }
+
+            currentExpediente.cliente = cliente;
+            currentExpediente.numero = numero;
+            currentExpediente.fecha = fecha;
+            currentExpediente.importe = importe;
+
+            localStorage.setItem('currentExpediente', JSON.stringify(currentExpediente));
+            initializeChecklist();
+            alert('✅ Expediente creado/actualizado correctamente');
+        }
+
+        function initializeChecklist() {
+            const checklist = document.getElementById('documentChecklist');
+            if (!checklist) return;
+            
+            checklist.innerHTML = '';
+
+            requiredDocuments.forEach(doc => {
+                const hasFiles = currentExpediente.documents && currentExpediente.documents[doc.id] && currentExpediente.documents[doc.id].length > 0;
+                
+                const item = document.createElement('div');
+                item.className = `document-item ${doc.type}`;
+                if (hasFiles) {
+                    item.classList.add('completed');
+                }
+
+                let filesSection = '';
+                if (hasFiles) {
+                    const files = currentExpediente.documents[doc.id];
+                    filesSection = `
+                        <div class="document-files">
+                            ${files.map(file => `
+                                <div class="attached-file">
+                                    <div class="file-info">
+                                        <div class="file-icon">${getFileIcon(file.name)}</div>
+                                        <div class="file-details">
+                                            <div class="file-name">${file.name}</div>
+                                            <div class="file-size">${formatFileSize(file.size)}</div>
+                                        </div>
+                                    </div>
+                                    <div class="file-actions-mini">
+                                        <button class="mini-btn view-mini" onclick="viewFile('${file.id}', '${doc.id}')" title="Ver archivo">👁️</button>
+                                        <button class="mini-btn delete-mini" onclick="removeFileFromDocument('${doc.id}', '${file.id}')" title="Quitar">🗑️</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                item.innerHTML = `
+                    <div class="document-header">
+                        <input type="checkbox" class="checkbox" id="check_${doc.id}" 
+                               ${hasFiles ? 'checked' : ''} disabled>
+                        <label for="check_${doc.id}" class="document-text">${doc.text}</label>
+                        <span class="document-badge badge-${doc.type}">
+                            ${doc.type === 'client' ? 'Cliente' : doc.type === 'taller' ? 'Taller' : 'General'}
+                        </span>
+                    </div>
+                    ${filesSection}
+                `;
+
+                checklist.appendChild(item);
+            });
+
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const completedCount = document.getElementById('completedCount');
+            const totalCount = document.getElementById('totalCount');
+            const progressPercent = document.getElementById('progressPercent');
+            const progressFill = document.getElementById('progressFill');
+            const checklistProgress = document.getElementById('checklistProgress');
+            const fileCount = document.getElementById('fileCount');
+            
+            if (!completedCount) return; // Solo en la sección de expedientes
+
+            const completed = currentExpediente.documents ? 
+                Object.values(currentExpediente.documents).filter(files => files.length > 0).length : 0;
+            const total = requiredDocuments.length;
+            const percentage = Math.round((completed / total) * 100);
+
+            completedCount.textContent = completed;
+            totalCount.textContent = total;
+            progressPercent.textContent = percentage + '%';
+            progressFill.style.width = percentage + '%';
+            checklistProgress.textContent = `${completed}/${total}`;
+            
+            // Actualizar contador de archivos
+            const totalFiles = currentExpediente.documents ? 
+                Object.values(currentExpediente.documents).reduce((sum, files) => sum + files.length, 0) : 0;
+            fileCount.textContent = `${totalFiles} archivos asignados`;
+        }
+
+        function assignFile(fileId) {
+            const fileObj = attachments.find(f => f.id == fileId);
+            const selector = document.getElementById(`selector_${fileId}`);
+            const documentId = selector.value;
+
+            if (!documentId) {
+                alert('Por favor, selecciona a qué documento corresponde este archivo');
+                return;
+            }
+
+            // Añadir el archivo al documento
+            if (!currentExpediente.documents) {
+                currentExpediente.documents = {};
+            }
+            if (!currentExpediente.documents[documentId]) {
+                currentExpediente.documents[documentId] = [];
+            }
+            currentExpediente.documents[documentId].push(fileObj);
+
+            // Remover de pendientes
+            attachments = attachments.filter(f => f.id != fileId);
+
+            // Actualizar localStorage
+            localStorage.setItem('currentExpediente', JSON.stringify(currentExpediente));
+            localStorage.setItem('attachments', JSON.stringify(attachments));
+
+            // Actualizar interfaz
+            displayAttachments();
+            initializeChecklist();
+        }
+
+        function removeFileFromDocument(documentId, fileId) {
+            if (confirm('¿Estás seguro de que quieres quitar este archivo del documento?')) {
+                if (currentExpediente.documents && currentExpediente.documents[documentId]) {
+                    const files = currentExpediente.documents[documentId];
+                    const filteredFiles = files.filter(f => f.id != fileId);
+                    
+                    if (filteredFiles.length === 0) {
+                        delete currentExpediente.documents[documentId];
+                    } else {
+                        currentExpediente.documents[documentId] = filteredFiles;
+                    }
+                    
+                    localStorage.setItem('currentExpediente', JSON.stringify(currentExpediente));
+                    initializeChecklist();
+                }
+            }
+        }
+
+        function viewFile(fileId, documentId) {
+            // Buscar el archivo en el expediente actual
+            let fileObj = null;
+            if (currentExpediente.documents && currentExpediente.documents[documentId]) {
+                fileObj = currentExpediente.documents[documentId].find(f => f.id == fileId);
+            }
+
+            if (!fileObj) return;
+
+            const modal = document.getElementById('fileModal');
+            const viewer = document.getElementById('fileViewer');
+
+            viewer.innerHTML = `
+                <h2>📄 ${fileObj.name}</h2>
+                <p><strong>Tamaño:</strong> ${formatFileSize(fileObj.size)}</p>
+                <p><strong>Fecha de subida:</strong> ${new Date(fileObj.timestamp).toLocaleDateString('es-ES')}</p>
+                <hr style="margin: 20px 0;">
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">${getFileIcon(fileObj.name)}</div>
+                    <p>Vista previa no disponible</p>
+                    <p>El archivo se ha guardado correctamente en el expediente</p>
+                    <button class="btn" onclick="downloadAttachmentFile('${fileId}')">📥 Descargar Archivo</button>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        function downloadAttachmentFile(fileId) {
+            let fileObj = null;
+            
+            // Buscar en attachments
+            fileObj = attachments.find(f => f.id == fileId);
+            
+            // Si no está en attachments, buscar en expediente documents
+            if (!fileObj && currentExpediente.documents) {
+                for (const files of Object.values(currentExpediente.documents)) {
+                    fileObj = files.find(f => f.id == fileId);
+                    if (fileObj) break;
+                }
+            }
+
+            if (!fileObj) return;
+
+            const url = URL.createObjectURL(fileObj.file);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileObj.name;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportExpediente() {
+            if (!currentExpediente.cliente || !currentExpediente.numero) {
+                alert('Por favor, crea primero un expediente con datos básicos');
+                return;
+            }
+
+            const completed = currentExpediente.documents ? 
+                Object.values(currentExpediente.documents).filter(files => files.length > 0).length : 0;
+            const totalFiles = currentExpediente.documents ? 
+                Object.values(currentExpediente.documents).reduce((sum, files) => sum + files.length, 0) : 0;
+
+            let exportText = `EXPEDIENTE DE DOCUMENTACIÓN\n`;
+            exportText += `=========================================\n`;
+            exportText += `Cliente: ${currentExpediente.cliente}\n`;
+            exportText += `Número: ${currentExpediente.numero}\n`;
+            exportText += `Fecha: ${currentExpediente.fecha}\n`;
+            exportText += `Importe: €${currentExpediente.importe}\n`;
+            exportText += `Progreso: ${completed}/${requiredDocuments.length} documentos\n`;
+            exportText += `Total archivos: ${totalFiles}\n`;
+            exportText += `Fecha de exportación: ${new Date().toLocaleDateString('es-ES')}\n\n`;
+
+            exportText += `DOCUMENTACIÓN REQUERIDA:\n`;
+            exportText += `========================\n`;
+            requiredDocuments.forEach((doc, index) => {
+                const hasFiles = currentExpediente.documents && currentExpediente.documents[doc.id] && currentExpediente.documents[doc.id].length > 0;
+                const checked = hasFiles ? '✅' : '❌';
+                const typeLabel = doc.type === 'client' ? '(CLIENTE)' : 
+                                doc.type === 'taller' ? '(TALLER)' : '(GENERAL)';
+                exportText += `${index + 1}. ${checked} ${doc.text} ${typeLabel}\n`;
+                
+                if (hasFiles) {
+                    const files = currentExpediente.documents[doc.id];
+                    files.forEach(file => {
+                        exportText += `    📎 ${file.name} (${formatFileSize(file.size)})\n`;
+                    });
+                }
+                exportText += `\n`;
+            });
+
+            downloadFile(`expediente-${currentExpediente.numero}-${new Date().toISOString().split('T')[0]}.txt`, exportText);
+        }
+
+        // WHATSAPP
+        function processWhatsApp() {
+            const whatsappText = document.getElementById('whatsappText').value;
+            
+            if (!whatsappText.trim()) {
+                alert('Por favor, pega el texto de la conversación de WhatsApp');
+                return;
+            }
+
+            whatsappIncidencias = [];
+            const messagePattern = /(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s*(\d{1,2}:\d{2})\s*[-–]?\s*([^:]+):\s*(.+)/g;
+            const matriculaPattern = /\b(\d{4,6})\b/g;
+            
+            let match;
+            while ((match = messagePattern.exec(whatsappText)) !== null) {
+                const [, fecha, hora, remitente, mensaje] = match;
+                const matriculas = [...mensaje.matchAll(matriculaPattern)].map(m => m[1]);
+                
+                if (matriculas.length > 0 || 
+                    mensaje.toLowerCase().includes('problema') || 
+                    mensaje.toLowerCase().includes('incidencia') || 
+                    mensaje.toLowerCase().includes('error') ||
+                    mensaje.toLowerCase().includes('fallo')) {
+                    
+                    whatsappIncidencias.push({
+                        id: Date.now() + Math.random(),
+                        fecha: fecha,
+                        hora: hora,
+                        remitente: remitente.trim(),
+                        mensaje: mensaje.trim(),
+                        matriculas: matriculas,
+                        tipo: determinarTipoIncidencia(mensaje)
+                    });
+                }
+            }
+
+            if (whatsappIncidencias.length === 0) {
+                alert('No se detectaron incidencias en el texto. Verifica que el formato sea correcto.');
+                return;
+            }
+
+            localStorage.setItem('whatsappIncidencias', JSON.stringify(whatsappIncidencias));
+            displayWhatsAppIncidencias();
+            document.getElementById('exportIncBtn').style.display = 'inline-block';
+        }
+
+        function determinarTipoIncidencia(mensaje) {
+            const msg = mensaje.toLowerCase();
+            if (msg.includes('login') || msg.includes('acceso') || msg.includes('contraseña')) return 'Acceso';
+            if (msg.includes('conectar') || msg.includes('conexión') || msg.includes('red')) return 'Conectividad';
+            if (msg.includes('lento') || msg.includes('rendimiento') || msg.includes('velocidad')) return 'Rendimiento';
+            if (msg.includes('error') || msg.includes('fallo') || msg.includes('problema')) return 'Error';
+            return 'General';
+        }
+
+        function displayWhatsAppIncidencias() {
+            const resultsDiv = document.getElementById('whatsappResults');
+            
+            if (whatsappIncidencias.length === 0) {
+                resultsDiv.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">💬 No hay incidencias procesadas</div>';
+                return;
+            }
+
+            let html = '<div class="results">';
+            html += `<div class="result-header">`;
+            html += `<h3>📋 Incidencias Detectadas (${whatsappIncidencias.length})</h3>`;
+            html += `</div>`;
+
+            whatsappIncidencias.forEach(inc => {
+                html += `
+                <div class="whatsapp-item">
+                    <div class="whatsapp-header">
+                        <span class="whatsapp-badge">${inc.tipo}</span>
+                        <div style="color: #666; font-size: 14px;">
+                            📅 ${inc.fecha} 🕐 ${inc.hora}
+                        </div>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <strong>👤 Remitente:</strong> ${inc.remitente}
+                    </div>
+                    ${inc.matriculas.length > 0 ? `
+                    <div style="margin: 10px 0;">
+                        <strong>🎓 Matrículas:</strong>
+                        ${inc.matriculas.map(mat => `<span class="matricula-badge">${mat}</span>`).join('')}
+                    </div>` : ''}
+                    <div style="margin: 10px 0;">
+                        <strong>📝 Descripción:</strong> ${inc.mensaje}
+                    </div>
+                </div>`;
+            });
+
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+
+        function exportWhatsAppIncidencias() {
+            if (whatsappIncidencias.length === 0) return;
+
+            let exportText = `REGISTRO DE INCIDENCIAS TÉCNICAS (WhatsApp)\n`;
+            exportText += `========================================\n`;
+            exportText += `Generado: ${new Date().toLocaleDateString('es-ES')}\n`;
+            exportText += `Total de incidencias: ${whatsappIncidencias.length}\n\n`;
+            
+            whatsappIncidencias.forEach((inc, index) => {
+                exportText += `${index + 1}. INCIDENCIA - ${inc.tipo}\n`;
+                exportText += `   Fecha: ${inc.fecha} ${inc.hora}\n`;
+                exportText += `   Remitente: ${inc.remitente}\n`;
+                exportText += `   Matrículas: ${inc.matriculas.join(', ') || 'No especificada'}\n`;
+                exportText += `   Descripción: ${inc.mensaje}\n`;
+                exportText += `   ----------------------------\n\n`;
+            });
+            
+            downloadFile(`incidencias-whatsapp-${new Date().toISOString().split('T')[0]}.txt`, exportText);
+        }
+
+        // FUNCIONES AUXILIARES
+        function downloadFile(filename, content) {
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Modal functionality
+        const modal = document.getElementById('fileModal');
+        const closeBtn = document.querySelector('.close');
+
+        if (closeBtn) {
+            closeBtn.onclick = function() {
+                modal.style.display = 'none';
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+            if (event.target == document.getElementById('reportModal')) {
+                document.getElementById('reportModal').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

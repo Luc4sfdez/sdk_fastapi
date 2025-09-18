@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tacolu - Soluciones Profesionales</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Definición de colores personalizados */
+        :root {
+            --primary-color: #e10600;
+            --primary-light: #ff3b36;
+            --primary-dark: #b30500;
+            --secondary-color: #000000;
+            --secondary-light: #333333;
+            --secondary-dark: #000000;
+            --text-light: #ffffff;
+            --text-dark: #000000;
+            --bg-light: #ffffff;
+            --bg-dark: #121212;
+        }
+
+        /* Clases de utilidad para colores */
+        .primary-bg { background-color: var(--primary-color); }
+        .primary-text { color: var(--primary-color); }
+        .secondary-bg { background-color: var(--secondary-color); }
+        .secondary-text { color: var(--secondary-color); }
+
+        /* Transiciones para cambio de tema */
+        .transition-theme {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* Estilos para tema oscuro */
+        .dark .dark\:bg-gray-900 { background-color: var(--bg-dark); }
+        .dark .dark\:bg-gray-800 { background-color: #1e1e1e; }
+        .dark .dark\:bg-gray-700 { background-color: #2d2d2d; }
+        .dark .dark\:text-white { color: var(--text-light); }
+        .dark .dark\:text-gray-300 { color: #d1d5db; }
+        .dark .dark\:text-gray-400 { color: #9ca3af; }
+        .dark .dark\:border-gray-700 { border-color: #374151; }
+        .dark .dark\:border-gray-600 { border-color: #4b5563; }
+
+        /* Estilos para tema claro */
+        .light .light\:bg-white { background-color: var(--bg-light); }
+        .light .light\:text-black { color: var(--text-dark); }
+
+        /* Estilos para sidebar */
+        .sidebar {
+            width: 280px;
+            transition: width 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar-text {
+            transition: opacity 0.2s ease;
+        }
+        .collapsed .sidebar-text {
+            opacity: 0;
+            display: none;
+        }
+        .service-icon {
+            transition: margin 0.3s ease;
+        }
+        .collapsed .service-icon {
+            margin-right: 0;
+        }
+
+        /* Estilos para modales */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay:not(.hidden) .modal-content {
+            transform: scale(1);
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 transition-theme">
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="modal-overlay absolute inset-0"></div>
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6 transition-theme">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-black dark:text-white transition-theme">Iniciar Sesión</h3>
+                <button onclick="toggleModal('loginModal')" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white transition-theme">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label for="loginEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-theme">Correo Electrónico</label>
+                    <input type="email" id="loginEmail" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-DEFAULT focus:border-primary-DEFAULT bg-white dark:bg-gray-700 text-black dark:text-white transition-theme" required>
+                </div>
+                <div class="mb-6">
+                    <label for="loginPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-theme">Contraseña</label>
+                    <input type="password" id="loginPassword" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-DEFAULT focus:border-primary-DEFAULT bg-white dark:bg-gray-700 text-black dark:text-white transition-theme" required>
+                </div>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" class="h-4 w-4 text-primary-DEFAULT focus:ring-primary-DEFAULT border-gray-300 rounded">
+                        <label for="remember" class="ml-2 block text-sm text-gray-700 dark:text-gray-300 transition-theme">Recordarme</label>
+                    </div>
+                    <a href="#" class="text-sm text-primary-DEFAULT hover:text-primary-dark">¿Olvidaste tu contraseña?</a>
+                </div>
+                <button type="submit" class="w-full primary-bg text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition">Ingresar</button>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 transition-theme">¿No tienes una cuenta? <a href="#" onclick="toggleModal('loginModal'); toggleModal('registerModal');" class="text-primary-DEFAULT hover:text-primary-dark">Regístrate</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="modal-overlay absolute inset-0"></div>
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 p-6 transition-theme">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-black dark:text-white transition-theme">Crear Cuenta</h3>
+                <button onclick="toggleModal('registerModal')" class="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white transition-theme">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="registerForm">
+                <div class="mb-4">
+                    <label for="registerName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-theme">Nombre Completo</label>
+                    <input type="text" id="registerName" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-DEFAULT focus:border-primary-DEFAULT bg-white dark:bg-gray-700 text-black dark:text-white transition-theme" required>
+                </div>
+                <div class="mb-4">
+                    <label for="registerEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-theme">Correo Electrónico</label>
+                    <input type="email" id="registerEmail" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-DEFAULT focus:border-primary-DEFAULT bg-white dark:bg-gray-700 text-black dark:text-white transition-theme" required>
+                </div>
+                <div class="mb-6">
+                    <label for="registerPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-theme">Contraseña</label>
+                    <input type="password" id="registerPassword" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-DEFAULT focus:border-primary-DEFAULT bg-white dark:bg-gray-700 text-black dark:text-white transition-theme" required>
+                </div>
+                <button type="submit" class="w-full primary-bg text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition">Registrarse</button>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 transition-theme">¿Ya tienes una cuenta? <a href="#" onclick="toggleModal('registerModal'); toggleModal('loginModal');" class="text-primary-DEFAULT hover:text-primary-dark">Inicia sesión</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar bg-gray-800 text-white h-screen overflow-y-auto fixed lg:relative z-30">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-lg primary-bg flex items-center justify-center text-white font-bold mr-3">T</div>
+                        <span class="text-xl font-bold sidebar-text">Tacolu</span>
+                    </div>
+                    <button id="toggleSidebar" class="lg:hidden text-gray-400 hover:text-white">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-8">
+                    <h5 class="text-xs text-gray-400 uppercase tracking-wider mb-3 sidebar-text">Servicios</h5>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#ms-01" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                                <i class="fas fa-calculator w-6 text-center mr-3 service-icon"></i>
+                                <span class="sidebar-text">Calculadora de Honorarios</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#ms-02" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                                <i class="fas fa-file-alt w-6 text-center mr-3 service-icon"></i>
+                                <span class="sidebar-text">Gestión de Documentos</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#ms-03" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                                <i class="fas fa-chart-bar w-6 text-center mr-3 service-icon"></i>
+                                <span class="sidebar-text">Informes Operativos</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#ms-04" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                                <i class="fas fa-tachometer-alt w-6 text-center mr-3 service-icon"></i>
+                                <span class="sidebar-text">Análisis de Tacógrafos</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#ms-05" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                                <i class="fas fa-users w-6 text-center mr-3 service-icon"></i>
+                                <span class="sidebar-text">Gestión de Usuarios</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#ms-06" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                                <i class="fas fa-file-image w-6 text-center mr-3 service-icon"></i>
+                                <span class="sidebar-text">Servicio OCR</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#ms-07" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                                <i class="fas fa-calendar-alt w-6 text-center mr-3 service-icon"></i>
+                                <span class="sidebar-text">Control de Caducidades</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="mb-8">
+                    <h5 class="text-xs text-gray-400 uppercase tracking-wider mb-3 sidebar-text">Configuración</h5>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                                <i class="fas fa-cog w-6 text-center mr-3 service-icon"></i>
+                                <span class="sidebar-text">Ajustes</span>
+                            </a>
+                        </li>
+                        <li>
+                            <button id="themeToggle" class="w-full flex items-center px-3 py-2 rounded-lg hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                                <i id="themeIcon" class="fas fa-moon w-6 text-center mr-3 service-icon"></i>
+                                <span class="sidebar-text">Cambiar tema</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="pt-4 border-t border-gray-700">
+                    <div class="flex items-center px-3 py-2">
+                        <div class="w-8 h-8 rounded-full primary-bg flex items-center justify-center text-white font-bold mr-3">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="sidebar-text">
+                            <h5 id="userName" class="text-sm font-medium">Invitado</h5>
+                            <p class="text-xs text-gray-400">No autenticado</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-900 transition-theme">
+            <main class="container mx-auto px-4 py-8">
+                <!-- Header -->
+                <header class="flex justify-between items-center mb-8">
+                    <h1 class="text-2xl font-bold text-black dark:text-white transition-theme">Bienvenido a <span class="primary-text">Tacolu</span></h1>
+                    <button id="authButton" onclick="toggleModal('loginModal')" class="bg-white text-black py-2 px-4 rounded-lg font-medium hover:bg-gray-100 transition">Iniciar Sesión</button>
+                </header>
+
+                <!-- Hero Section -->
+                <section class="mb-16">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                        <div class="md:flex">
+                            <div class="md:w-1/2 p-8 md:p-12">
+                                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-black dark:text-white transition-theme">Optimiza tu trabajo con <span class="primary-text">Tacolu</span></h2>
+                                <p class="text-gray-600 dark:text-gray-300 mb-6 transition-theme">La solución integral que combina 7 servicios profesionales esenciales para mejorar tus procesos laborales.</p>
+                                <div class="flex flex-wrap gap-4">
+                                    <button class="primary-bg text-white py-2 px-6 rounded-lg font-medium hover:opacity-90 transition">Comenzar ahora</button>
+                                    <button class="border-2 border-primary-DEFAULT text-primary-DEFAULT dark:text-primary-light py-2 px-6 rounded-lg font-medium hover:bg-primary-DEFAULT hover:text-white transition">Ver demostración</button>
+                                </div>
+                            </div>
+                            <div class="md:w-1/2 primary-bg flex items-center justify-center p-8 md:p-12">
+                                <div class="text-center">
+                                    <div class="text-white text-5xl mb-4"><i class="fas fa-rocket"></i></div>
+                                    <h3 class="text-white text-xl font-bold mb-2">Impulsa tu productividad</h3>
+                                    <p class="text-white text-opacity-90">Nuestras herramientas te ayudan a optimizar tiempo y recursos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Services Section -->
+                <section class="mb-16">
+                    <div class="text-center mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-black dark:text-white transition-theme">Nuestros <span class="primary-text">servicios</span></h2>
+                        <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto transition-theme">Descubre todas las herramientas profesionales que tenemos para ofrecerte</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Service 1 -->
+                        <div id="ms-01" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                            <div class="p-6">
+                                <div class="w-12 h-12 rounded-lg primary-bg flex items-center justify-center text-white text-xl mb-4">
+                                    <i class="fas fa-calculator"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2 text-black dark:text-white transition-theme">Calculadora de Honorarios</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4 transition-theme">Calcula automáticamente honorarios profesionales basados en tarifas personalizables y servicios prestados.</p>
+                                <a href="#" class="inline-flex items-center text-primary-DEFAULT hover:text-primary-dark">
+                                    <span>Más información</span>
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Service 2 -->
+                        <div id="ms-02" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                            <div class="p-6">
+                                <div class="w-12 h-12 rounded-lg primary-bg flex items-center justify-center text-white text-xl mb-4">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2 text-black dark:text-white transition-theme">Gestión de Documentos</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4 transition-theme">Organiza, almacena y accede a todos tus documentos importantes desde cualquier dispositivo.</p>
+                                <a href="#" class="inline-flex items-center text-primary-DEFAULT hover:text-primary-dark">
+                                    <span>Más información</span>
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Service 3 -->
+                        <div id="ms-03" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                            <div class="p-6">
+                                <div class="w-12 h-12 rounded-lg primary-bg flex items-center justify-center text-white text-xl mb-4">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2 text-black dark:text-white transition-theme">Informes Operativos</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4 transition-theme">Genera informes detallados sobre el rendimiento operativo de tu empresa o departamento.</p>
+                                <a href="#" class="inline-flex items-center text-primary-DEFAULT hover:text-primary-dark">
+                                    <span>Más información</span>
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Service 4 -->
+                        <div id="ms-04" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                            <div class="p-6">
+                                <div class="w-12 h-12 rounded-lg primary-bg flex items-center justify-center text-white text-xl mb-4">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2 text-black dark:text-white transition-theme">Análisis de Tacógrafos</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4 transition-theme">Analiza y gestiona los datos de tacógrafos para cumplir con la normativa y optimizar rutas.</p>
+                                <a href="#" class="inline-flex items-center text-primary-DEFAULT hover:text-primary-dark">
+                                    <span>Más información</span>
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Service 5 -->
+                        <div id="ms-05" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                            <div class="p-6">
+                                <div class="w-12 h-12 rounded-lg primary-bg flex items-center justify-center text-white text-xl mb-4">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2 text-black dark:text-white transition-theme">Gestión de Usuarios</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4 transition-theme">Administra usuarios, permisos y roles para mantener la seguridad y organización de tu sistema.</p>
+                                <a href="#" class="inline-flex items-center text-primary-DEFAULT hover:text-primary-dark">
+                                    <span>Más información</span>
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Service 6 -->
+                        <div id="ms-06" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                            <div class="p-6">
+                                <div class="w-12 h-12 rounded-lg primary-bg flex items-center justify-center text-white text-xl mb-4">
+                                    <i class="fas fa-file-image"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2 text-black dark:text-white transition-theme">Servicio OCR</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4 transition-theme">Convierte documentos escaneados en texto editable con nuestro avanzado sistema de reconocimiento óptico.</p>
+                                <a href="#" class="inline-flex items-center text-primary-DEFAULT hover:text-primary-dark">
+                                    <span>Más información</span>
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Service 7 -->
+                        <div id="ms-07" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                            <div class="p-6">
+                                <div class="w-12 h-12 rounded-lg primary-bg flex items-center justify-center text-white text-xl mb-4">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2 text-black dark:text-white transition-theme">Control de Caducidades</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4 transition-theme">Gestiona y recibe alertas sobre fechas de caducidad de documentos importantes como seguros, ITVs y tacógrafos.</p>
+                                <a href="#" class="inline-flex items-center text-primary-DEFAULT hover:text-primary-dark">
+                                    <span>Más información</span>
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Features Section -->
+                <section class="mb-16">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                        <div class="md:flex">
+                            <div class="md:w-1/2 p-8 md:p-12">
+                                <h2 class="text-2xl md:text-3xl font-bold mb-6 text-black dark:text-white transition-theme">Por qué elegir <span class="primary-text">Tacolu</span></h2>
+                                
+                                <div class="space-y-6">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 rounded-lg primary-bg flex items-center justify-center text-white">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ml-4">
+                                            <h3 class="text-lg font-semibold text-black dark:text-white transition-theme">Todo en uno</h3>
+                                            <p class="text-gray-600 dark:text-gray-300 transition-theme">Accede a todos los servicios desde una única plataforma integrada.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 rounded-lg primary-bg flex items-center justify-center text-white">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ml-4">
+                                            <h3 class="text-lg font-semibold text-black dark:text-white transition-theme">Fácil de usar</h3>
+                                            <p class="text-gray-600 dark:text-gray-300 transition-theme">Interfaz intuitiva diseñada para maximizar la productividad.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 rounded-lg primary-bg flex items-center justify-center text-white">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ml-4">
+                                            <h3 class="text-lg font-semibold text-black dark:text-white transition-theme">Seguridad avanzada</h3>
+                                            <p class="text-gray-600 dark:text-gray-300 transition-theme">Protección de datos con encriptación de nivel empresarial.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 rounded-lg primary-bg flex items-center justify-center text-white">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ml-4">
+                                            <h3 class="text-lg font-semibold text-black dark:text-white transition-theme">Soporte personalizado</h3>
+                                            <p class="text-gray-600 dark:text-gray-300 transition-theme">Asistencia técnica dedicada para resolver cualquier duda.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="md:w-1/2 primary-bg flex items-center justify-center p-8 md:p-12">
+                                <div class="text-center">
+                                    <div class="text-white text-5xl mb-4"><i class="fas fa-star"></i></div>
+                                    <h3 class="text-white text-xl font-bold mb-2">Experiencia premium</h3>
+                                    <p class="text-white text-opacity-90">Más de 500 empresas confían en nuestros servicios</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Testimonials Section -->
+                <section id="testimonials" class="mb-16">
+                    <div class="text-center mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-black dark:text-white transition-theme">Lo que dicen nuestros <span class="primary-text">clientes</span></h2>
+                        <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto transition-theme">Descubre por qué nuestros usuarios están satisfechos con Tacolu</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-theme">
+                            <div class="flex text-primary-DEFAULT mb-4">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            
+                            <div class="border-l-4 border-primary-DEFAULT pl-4">
+                                <p class="text-gray-700 dark:text-gray-300 italic mb-4 transition-theme">"La Calculadora de Honorarios ha simplificado enormemente nuestra facturación. Ahorramos horas cada semana y hemos reducido errores en un 95%. Una herramienta imprescindible para cualquier empresa de servicios."</p>
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-full primary-bg mr-4 flex items-center justify-center text-white font-bold">JG</div>
+                                    <div>
+                                        <p class="font-semibold text-black dark:text-white transition-theme">Juan García</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 transition-theme">Director Financiero</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-theme">
+                            <div class="flex text-primary-DEFAULT mb-4">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            
+                            <div class="border-l-4 border-primary-DEFAULT pl-4">
+                                <p class="text-gray-700 dark:text-gray-300 italic mb-4 transition-theme">"El Control de Caducidades nos ha salvado de multas costosas al mantener al día nuestros documentos. Las alertas son precisas y el sistema es muy fácil de usar. Totalmente recomendado para empresas de transporte."</p>
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-full primary-bg mr-4 flex items-center justify-center text-white font-bold">RL</div>
+                                    <div>
+                                        <p class="font-semibold text-black dark:text-white transition-theme">Roberto López</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 transition-theme">Gerente de Transportes</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border-l-4 border-primary-DEFAULT pl-4">
+                                <p class="text-gray-700 dark:text-gray-300 italic mb-4 transition-theme">"Los informes operativos me dan una visión clara del rendimiento de mi empresa. La interfaz es intuitiva y la capacidad de cambiar entre tema claro y oscuro es perfecta para trabajar a cualquier hora del día."</p>
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-full primary-bg mr-4 flex items-center justify-center text-white font-bold">MR</div>
+                                    <div>
+                                        <p class="font-semibold text-black dark:text-white transition-theme">María Rodríguez</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 transition-theme">Directora Financiera</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Pricing Section -->
+                <section id="pricing" class="mb-16">
+                    <div class="text-center mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-black dark:text-white transition-theme">Planes <span class="primary-text">profesionales</span></h2>
+                        <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto transition-theme">Elige el paquete que mejor se adapte a tus necesidades profesionales</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                            <div class="primary-bg p-6 text-white text-center">
+                                <h3 class="text-xl font-bold">Básico</h3>
+                                <p class="text-white text-opacity-90">Para profesionales independientes</p>
+                            </div>
+                            <div class="p-6">
+                                <div class="text-center mb-6">
+                                    <span class="text-4xl font-bold text-black dark:text-white transition-theme">€29</span>
+                                    <span class="text-gray-500 dark:text-gray-400 transition-theme">/mes</span>
+                                </div>
+                                <ul class="space-y-3 mb-8">
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>Acceso a 3 servicios</span>
+                                    </li>
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>5GB Almacenamiento</span>
+                                    </li>
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>Soporte básico</span>
+                                    </li>
+                                    <li class="flex items-center text-gray-400">
+                                        <i class="fas fa-times text-red-500 mr-2"></i>
+                                        <span>Informes avanzados</span>
+                                    </li>
+                                    <li class="flex items-center text-gray-400">
+                                        <i class="fas fa-times text-red-500 mr-2"></i>
+                                        <span>OCR ilimitado</span>
+                                    </li>
+                                </ul>
+                                <button class="w-full border-2 border-primary-DEFAULT text-primary-DEFAULT dark:text-primary-light py-2 px-4 rounded-lg font-medium hover:bg-primary-DEFAULT hover:text-white transition">Seleccionar</button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transform scale-105 transition-theme">
+                            <div class="relative">
+                                <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-bl-lg">POPULAR</div>
+                                <div class="primary-bg p-6 text-white text-center">
+                                    <h3 class="text-xl font-bold">Profesional</h3>
+                                    <p class="text-white text-opacity-90">Ideal para pequeñas empresas</p>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="text-center mb-6">
+                                    <span class="text-4xl font-bold text-black dark:text-white transition-theme">€79</span>
+                                    <span class="text-gray-500 dark:text-gray-400 transition-theme">/mes</span>
+                                </div>
+                                <ul class="space-y-3 mb-8">
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>Acceso a todos los servicios</span>
+                                    </li>
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>50GB Almacenamiento</span>
+                                    </li>
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>Soporte prioritario</span>
+                                    </li>
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>Informes avanzados</span>
+                                    </li>
+                                    <li class="flex items-center text-gray-400">
+                                        <i class="fas fa-times text-red-500 mr-2"></i>
+                                        <span>OCR ilimitado</span>
+                                    </li>
+                                </ul>
+                                <button class="w-full primary-bg text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition">Seleccionar</button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                            <div class="primary-bg p-6 text-white text-center">
+                                <h3 class="text-xl font-bold">Empresa</h3>
+                                <p class="text-white text-opacity-90">Para organizaciones grandes</p>
+                            </div>
+                            <div class="p-6">
+                                <div class="text-center mb-6">
+                                    <span class="text-4xl font-bold text-black dark:text-white transition-theme">€149</span>
+                                    <span class="text-gray-500 dark:text-gray-400 transition-theme">/mes</span>
+                                </div>
+                                <ul class="space-y-3 mb-8">
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>Acceso a todos los servicios</span>
+                                    </li>
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>500GB Almacenamiento</span>
+                                    </li>
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>Soporte 24/7</span>
+                                    </li>
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>Informes avanzados</span>
+                                    </li>
+                                    <li class="flex items-center text-black dark:text-white transition-theme">
+                                        <i class="fas fa-check text-green-500 mr-2"></i>
+                                        <span>OCR ilimitado</span>
+                                    </li>
+                                </ul>
+                                <button class="w-full border-2 border-primary-DEFAULT text-primary-DEFAULT dark:text-primary-light py-2 px-4 rounded-lg font-medium hover:bg-primary-DEFAULT hover:text-white transition">Seleccionar</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Contact Section -->
+                <section id="contact" class="mb-16">
+                    <div class="text-center mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-4 text-black dark:text-white transition-theme">Contacta con <span class="primary-text">nosotros</span></h2>
+                        <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto transition-theme">¿Tienes alguna pregunta? Estamos aquí para ayudarte</p>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-theme">
+                        <div class="md:flex">
+                            <div class="md:w-1/2 primary-bg p-8 md:p-12 text-white">
+                                <h3 class="text-xl font-bold mb-4">Información de contacto</h3>
+                                <p class="mb-8">Completa el formulario y nos pondremos en contacto contigo lo antes posible.</p>
+                                
+                                <div class="space-y-4">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 mt-1">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <p>CTRA N325 KM NOVELDA 03660 ALICANTE</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 mt-1">
+                                            <i class="fas fa-phone"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <p>966 115 050</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 mt-1">
+                                            <i class="fas fa-globe"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <p>TACOLU.ES</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-8">
+                                    <h4 class="text-lg font-semibold mb-4">Síguenos</h4>
+                                    <div class="flex space-x-4">
+                                        <a href="#" class="text-white hover:text-gray-200 transition">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </a>
+                                        <a href="#" class="text-white hover:text-gray-200 transition">
+                                            <i class="fab fa-twitter"></i>
+                                        </a>
+                                        <a href="#" class="text-white hover:text-gray-200 transition">
+                                            <i class="fab fa-linkedin-in"></i>
+                                        </a>
+                                        <a href="#" class="text-white hover:text-gray-200 transition">
+                                            <i class="fab fa-instagram"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="md:w-1/2 p-8 md:p-12">
+                                <form class="space-y-4">
+                                    <div>
+                                        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-theme">Nombre completo</label>
+                                        <input type="text" id="name" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-DEFAULT focus:border-primary-DEFAULT bg-white dark:bg-gray-700 text-black dark:text-white transition-theme">
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-theme">Correo electrónico</label>
+                                        <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-DEFAULT focus:border-primary-DEFAULT bg-white dark:bg-gray-700 text-black dark:text-white transition-theme">
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-theme">Asunto</label>
+                                        <input type="text" id="subject" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-DEFAULT focus:border-primary-DEFAULT bg-white dark:bg-gray-700 text-black dark:text-white transition-theme">
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-theme">Mensaje</label>
+                                        <textarea id="message" rows="4" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-DEFAULT focus:border-primary-DEFAULT bg-white dark:bg-gray-700 text-black dark:text-white transition-theme"></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <button type="submit" class="primary-bg text-white py-2 px-6 rounded-lg font-medium hover:opacity-90 transition">Enviar mensaje</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Footer -->
+                <footer class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700 transition-theme">
+                    <div class="max-w-7xl mx-auto">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4 text-black dark:text-white transition-theme">Tacolu</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4 transition-theme">Soluciones profesionales para optimizar tu trabajo y mejorar la eficiencia de tus procesos.</p>
+                                <div class="flex space-x-4">
+                                    <a href="#" class="text-gray-400 hover:text-primary-DEFAULT transition-theme">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-DEFAULT transition-theme">
+                                        <i class="fab fa-twitter"></i>
+                                    </a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-DEFAULT transition-theme">
+                                        <i class="fab fa-linkedin-in"></i>
+                                    </a>
+                                    <a href="#" class="text-gray-400 hover:text-primary-DEFAULT transition-theme">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4 text-black dark:text-white transition-theme">Servicios</h3>
+                                <ul class="space-y-2">
+                                    <li><a href="#ms-01" class="text-gray-600 dark:text-gray-300 hover:text-primary-DEFAULT transition-theme">Calculadora de Honorarios</a></li>
+                                    <li><a href="#ms-02" class="text-gray-600 dark:text-gray-300 hover:text-primary-DEFAULT transition-theme">Gestión de Documentos</a></li>
+                                    <li><a href="#ms-03" class="text-gray-600 dark:text-gray-300 hover:text-primary-DEFAULT transition-theme">Informes Operativos</a></li>
+                                    <li><a href="#ms-04" class="text-gray-600 dark:text-gray-300 hover:text-primary-DEFAULT transition-theme">Análisis de Tacógrafos</a></li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4 text-black dark:text-white transition-theme">Enlaces rápidos</h3>
+                                <ul class="space-y-2">
+                                    <li><a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-DEFAULT transition-theme">Sobre nosotros</a></li>
+                                    <li><a href="#testimonials" class="text-gray-600 dark:text-gray-300 hover:text-primary-DEFAULT transition-theme">Testimonios</a></li>
+                                    <li><a href="#pricing" class="text-gray-600 dark:text-gray-300 hover:text-primary-DEFAULT transition-theme">Precios</a></li>
+                                    <li><a href="#contact" class="text-gray-600 dark:text-gray-300 hover:text-primary-DEFAULT transition-theme">Contacto</a></li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4 text-black dark:text-white transition-theme">Contacto</h3>
+                                <ul class="space-y-2">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-map-marker-alt text-primary-DEFAULT mt-1 mr-2"></i>
+                                        <span class="text-gray-600 dark:text-gray-300 transition-theme">CTRA N325 KM NOVELDA 03660 ALICANTE</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-phone text-primary-DEFAULT mt-1 mr-2"></i>
+                                        <span class="text-gray-600 dark:text-gray-300 transition-theme">966 115 050</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-globe text-primary-DEFAULT mt-1 mr-2"></i>
+                                        <span class="text-gray-600 dark:text-gray-300 transition-theme">TACOLU.ES</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-8 pb-8 text-center transition-theme">
+                            <p class="text-gray-500 dark:text-gray-400 transition-theme">&copy; 2025 Tacolu. Todos los derechos reservados.</p>
+                        </div>
+                    </div>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Funciones para modales
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        // Variables para autenticación
+        let isAuthenticated = false;
+        let currentUser = null;
+
+        // Verificar si hay un token guardado
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Verificar token con el servidor
+                fetch('http://localhost:9001/api/v1/auth/verify', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.valid) {
+                        isAuthenticated = true;
+                        currentUser = data.user;
+                        
+                        // Actualizar UI
+                        document.getElementById('userName').textContent = currentUser.name;
+                        document.querySelector('#sidebar .text-xs').textContent = 'Activo';
+                        document.getElementById('authButton').textContent = 'Cerrar Sesión';
+                        document.getElementById('authButton').classList.remove('bg-white', 'text-black');
+                        document.getElementById('authButton').classList.add('bg-red-600', 'text-white');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al verificar token:', error);
+                    localStorage.removeItem('token');
+                });
+            }
+        });
+
+        // Manejo del formulario de login
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch('http://localhost:9001/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    isAuthenticated = true;
+                    currentUser = {
+                        name: data.user.name,
+                        email: data.user.email
+                    };
+                    localStorage.setItem('token', data.token);
+                    
+                    // Actualizar UI
+                    document.getElementById('userName').textContent = currentUser.name;
+                    document.querySelector('#sidebar .text-xs').textContent = 'Activo';
+                    document.getElementById('authButton').textContent = 'Cerrar Sesión';
+                    document.getElementById('authButton').classList.remove('bg-white', 'text-black');
+                    document.getElementById('authButton').classList.add('bg-red-600', 'text-white');
+                    
+                    // Cerrar modal
+                    toggleModal('loginModal');
+                    
+                    // Mostrar mensaje de bienvenida
+                    alert(`Bienvenido, ${currentUser.name}! Has iniciado sesión correctamente.`);
+                } else {
+                    alert(data.message || 'Error al iniciar sesión. Verifica tus credenciales.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al conectar con el servidor. Intenta nuevamente.');
+            }
+        });
+
+        // Manejo del formulario de registro
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            try {
+                const response = await fetch('http://localhost:9001/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Registro exitoso. Ahora puedes iniciar sesión.');
+                    toggleModal('registerModal');
+                    toggleModal('loginModal');
+                } else {
+                    alert(data.message || 'Error al registrarse. Inténtalo de nuevo.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al conectar con el servidor. Intenta nuevamente.');
+            }
+        });
+
+        // Manejo del botón de autenticación
+        document.getElementById('authButton').addEventListener('click', function() {
+            if (isAuthenticated) {
+                // Cerrar sesión
+                localStorage.removeItem('token');
+                isAuthenticated = false;
+                currentUser = null;
+                
+                // Actualizar UI
+                document.getElementById('userName').textContent = 'Invitado';
+                document.querySelector('#sidebar .text-xs').textContent = 'No autenticado';
+                document.getElementById('authButton').textContent = 'Iniciar Sesión';
+                document.getElementById('authButton').classList.remove('bg-red-600', 'text-white');
+                document.getElementById('authButton').classList.add('bg-white', 'text-black');
+                
+                alert('Has cerrado sesión correctamente.');
+            } else {
+                // Mostrar modal de login
+                toggleModal('loginModal');
+            }
+        });
+
+        // Manejo del toggle del sidebar
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        });
+
+        // Manejo del cambio de tema
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const htmlElement = document.documentElement;
+        
+        // Verificar tema guardado
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            htmlElement.classList.add('dark');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        } else {
+            htmlElement.classList.add('light');
+        }
+        
+        themeToggle.addEventListener('click', function() {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                htmlElement.classList.add('light');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                htmlElement.classList.remove('light');
+                htmlElement.classList.add('dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Smooth scrolling para enlaces internos
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

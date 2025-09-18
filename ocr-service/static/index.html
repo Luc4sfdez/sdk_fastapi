@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Service - Extractor de Texto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <style>
+        /* Variables CSS personalizadas */
+        :root {
+            --primary-color: #e10600;
+            --primary-light: #ff3b36;
+            --primary-dark: #b30500;
+            --secondary-color: #000000;
+            --secondary-light: #333333;
+            --secondary-dark: #000000;
+            --text-light: #ffffff;
+            --text-dark: #000000;
+            --bg-light: #ffffff;
+            --bg-dark: #121212;
+        }
+
+        /* Estilos específicos del OCR */
+        .upload-area {
+            border: 2px dashed var(--primary-color);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: var(--bg-light);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .upload-area:hover {
+            border-color: var(--primary-dark);
+            background: #fff5f5;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(225, 6, 0, 0.2);
+        }
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: #d4edda;
+            transform: scale(1.02);
+        }
+        
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .result-card {
+            display: none;
+            margin-top: 20px;
+            border: none;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .text-result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .case-study {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: var(--text-light);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px 0;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .case-study:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(225, 6, 0, 0.3);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-light) 100%);
+            color: var(--text-light);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .history-item {
+            border-left: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            margin: 15px 0;
+            background: var(--bg-light);
+            border-radius: 0 10px 10px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .history-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(225, 6, 0, 0.2);
+        }
+        
+        .loading-spinner {
+            display: none;
+        }
+
+        /* Navbar personalizada */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+            box-shadow: 0 2px 10px rgba(225, 6, 0, 0.3);
+        }
+
+        /* Botones personalizados */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(225, 6, 0, 0.4);
+        }
+
+        /* Cards mejoradas */
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Progress bar personalizada */
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #28a745, #20c997);
+            border-radius: 10px;
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Tema oscuro */
+        .dark-theme {
+            --bg-light: #1a1a1a;
+            --text-dark: #ffffff;
+        }
+        .dark-theme body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+        }
+        .dark-theme .card {
+            background-color: #2d2d2d;
+            color: var(--text-light);
+        }
+        .dark-theme .text-result {
+            background-color: #2d2d2d;
+            color: var(--text-light);
+            border-color: #444;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .upload-area {
+                padding: 20px;
+            }
+            .case-study, .stats-card {
+                margin: 5px 0;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-eye"></i> OCR Service
+                </a>
+                <span class="navbar-text">
+                    Extractor de Texto Inteligente
+                </span>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="row">
+                <!-- Panel Principal -->
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-upload"></i> Subir Documento
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Área de Upload -->
+                            <div class="upload-area" id="uploadArea">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                <h5>Arrastra tu documento aquí</h5>
+                                <p class="text-muted">o haz clic para seleccionar archivo</p>
+                                <p class="small">
+                                    <strong>Formatos soportados:</strong> JPG, PNG, PDF, TIFF, BMP<br>
+                                    <strong>Tamaño máximo:</strong> 10MB
+                                </p>
+                                <input type="file" id="fileInput" class="d-none" accept=".jpg,.jpeg,.png,.pdf,.tiff,.bmp">
+                            </div>
+
+                            <!-- Configuración OCR -->
+                            <div class="row mt-4" id="ocrConfig" style="display: none;">
+                                <div class="col-md-6">
+                                    <label for="language" class="form-label">Idioma</label>
+                                    <select class="form-select" id="language">
+                                        <option value="spa">Español</option>
+                                        <option value="eng">Inglés</option>
+                                        <option value="fra">Francés</option>
+                                        <option value="deu">Alemán</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Opciones</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="extractTables">
+                                        <label class="form-check-label" for="extractTables">
+                                            Extraer tablas
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="extractMetadata" checked>
+                                        <label class="form-check-label" for="extractMetadata">
+                                            Extraer metadatos
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botón Procesar -->
+                            <div class="text-center mt-4" id="processButton" style="display: none;">
+                                <button class="btn btn-success btn-lg" onclick="processOCR()">
+                                    <i class="fas fa-magic"></i> Procesar OCR
+                                </button>
+                            </div>
+
+                            <!-- Progreso -->
+                            <div class="progress-container" id="progressContainer">
+                                <h6>Procesando documento...</h6>
+                                <div class="progress mb-3">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         id="progressBar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <p class="text-center" id="progressMessage">Iniciando...</p>
+                                <div class="text-center">
+                                    <div class="spinner-border text-primary loading-spinner" id="loadingSpinner" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resultados -->
+                    <div class="card shadow result-card" id="resultCard">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-file-alt"></i> Texto Extraído
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <strong>Archivo:</strong>
+                                    <p id="resultFilename" class="mb-0"></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Confianza:</strong>
+                                    <p id="resultConfidence" class="mb-0"></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Páginas:</strong>
+                                    <p id="resultPages" class="mb-0"></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Tiempo:</strong>
+                                    <p id="resultTime" class="mb-0"></p>
+                                </div>
+                            </div>
+                            
+                            <div class="text-result" id="extractedText"></div>
+                            
+                            <div class="mt-3">
+                                <button class="btn btn-primary" onclick="copyText()">
+                                    <i class="fas fa-copy"></i> Copiar Texto
+                                </button>
+                                <button class="btn btn-secondary" onclick="downloadText()">
+                                    <i class="fas fa-download"></i> Descargar TXT
+                                </button>
+                                <button class="btn btn-info" onclick="showMetadata()">
+                                    <i class="fas fa-info-circle"></i> Ver Metadatos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel Lateral -->
+                <div class="col-lg-4">
+                    <!-- Casos de Uso -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-lightbulb"></i> Casos de Uso
+                            </h6>
+                        </div>
+                        <div class="card-body p-2">
+                            <div class="case-study">
+                                <h6><i class="fas fa-certificate"></i> Certificados</h6>
+                                <small>Digitaliza certificados académicos y profesionales</small>
+                            </div>
+                            <div class="case-study">
+                                <h6><i class="fas fa-receipt"></i> Facturas</h6>
+                                <small>Extrae datos de facturas automáticamente</small>
+                            </div>
+                            <div class="case-study">
+                                <h6><i class="fas fa-id-card"></i> Documentos ID</h6>
+                                <small>Procesa DNI, pasaportes y documentos oficiales</small>
+                            </div>
+                            <div class="case-study">
+                                <h6><i class="fas fa-file-alt"></i> Formularios</h6>
+                                <small>Convierte formularios escaneados a texto</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estadísticas -->
+                    <div class="stats-card mb-4">
+                        <h6><i class="fas fa-chart-bar"></i> Estadísticas</h6>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h4 id="totalProcessed">0</h4>
+                                <small>Documentos</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 id="avgConfidence">0%</h4>
+                                <small>Precisión</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Historial -->
+                    <div class="card shadow">
+                        <div class="card-header bg-secondary text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-history"></i> Historial Reciente
+                            </h6>
+                        </div>
+                        <div class="card-body" id="historyContainer">
+                            <p class="text-muted text-center">No hay procesamiento reciente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Metadatos -->
+    <div class="modal fade" id="metadataModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Metadatos del Documento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <pre id="metadataContent"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variables globales
+        let currentFileId = null;
+        let currentTaskId = null;
+        let currentResult = null;
+        const API_BASE = 'http://localhost:8006';
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            loadHistory();
+            updateStats();
+        });
+
+        function setupEventListeners() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            // Click en área de upload
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            // Drag & Drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            // Selección de archivo
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+        }
+
+        async function handleFileSelect(file) {
+            // Validar archivo
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf', 'image/tiff', 'image/bmp'];
+            if (!validTypes.includes(file.type)) {
+                alert('Formato de archivo no soportado');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('El archivo es muy grande (máximo 10MB)');
+                return;
+            }
+
+            // Mostrar información del archivo
+            document.getElementById('uploadArea').innerHTML = `
+                <i class="fas fa-file fa-2x text-success mb-2"></i>
+                <h6>${file.name}</h6>
+                <p class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">
+                    <i class="fas fa-times"></i> Cambiar archivo
+                </button>
+            `;
+
+            // Mostrar configuración
+            document.getElementById('ocrConfig').style.display = 'block';
+            document.getElementById('processButton').style.display = 'block';
+
+            // Subir archivo
+            await uploadFile(file);
+        }
+
+        async function uploadFile(file) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    currentFileId = result.file_id;
+                    console.log('Archivo subido:', result);
+                } else {
+                    throw new Error('Error al subir archivo');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al subir el archivo');
+            }
+        }
+
+        async function processOCR() {
+            if (!currentFileId) {
+                alert('Primero debes subir un archivo');
+                return;
+            }
+
+            try {
+                // Mostrar progreso
+                document.getElementById('progressContainer').style.display = 'block';
+                document.getElementById('loadingSpinner').style.display = 'block';
+                document.getElementById('processButton').style.display = 'none';
+
+                // Iniciar procesamiento
+                const ocrRequest = {
+                    file_id: currentFileId,
+                    language: document.getElementById('language').value,
+                    extract_tables: document.getElementById('extractTables').checked,
+                    extract_metadata: document.getElementById('extractMetadata').checked
+                };
+
+                const response = await fetch(`${API_BASE}/process`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(ocrRequest)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    currentTaskId = result.task_id;
+                    
+                    // Monitorear progreso
+                    monitorProgress();
+                } else {
+                    throw new Error('Error al procesar OCR');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al procesar el documento');
+                hideProgress();
+            }
+        }
+
+        async function monitorProgress() {
+            try {
+                const response = await fetch(`${API_BASE}/status/${currentTaskId}`);
+                
+                if (response.ok) {
+                    const status = await response.json();
+                    
+                    // Actualizar progreso
+                    document.getElementById('progressBar').style.width = `${status.progress}%`;
+                    document.getElementById('progressMessage').textContent = status.message;
+
+                    if (status.status === 'completed') {
+                        // Obtener resultados
+                        await getResults();
+                    } else if (status.status === 'failed') {
+                        alert('Error en el procesamiento: ' + status.message);
+                        hideProgress();
+                    } else {
+                        // Continuar monitoreando
+                        setTimeout(monitorProgress, 1000);
+                    }
+                } else {
+                    throw new Error('Error al obtener estado');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                setTimeout(monitorProgress, 2000); // Reintentar
+            }
+        }
+
+        async function getResults() {
+            try {
+                const response = await fetch(`${API_BASE}/results/${currentTaskId}`);
+                
+                if (response.ok) {
+                    currentResult = await response.json();
+                    showResults();
+                    addToHistory();
+                    updateStats();
+                } else {
+                    throw new Error('Error al obtener resultados');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al obtener los resultados');
+            }
+            
+            hideProgress();
+        }
+
+        function showResults() {
+            // Mostrar tarjeta de resultados
+            document.getElementById('resultCard').style.display = 'block';
+            
+            // Llenar datos
+            document.getElementById('resultFilename').textContent = currentResult.filename;
+            document.getElementById('resultConfidence').textContent = `${currentResult.confidence}%`;
+            document.getElementById('resultPages').textContent = currentResult.pages;
+            document.getElementById('resultTime').textContent = `${currentResult.processing_time}s`;
+            document.getElementById('extractedText').textContent = currentResult.text;
+
+            // Scroll a resultados
+            document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideProgress() {
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+        function copyText() {
+            const text = document.getElementById('extractedText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Texto copiado al portapapeles');
+            });
+        }
+
+        function downloadText() {
+            const text = document.getElementById('extractedText').textContent;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ocr_result_${currentResult.filename}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showMetadata() {
+            document.getElementById('metadataContent').textContent = 
+                JSON.stringify(currentResult.metadata, null, 2);
+            new bootstrap.Modal(document.getElementById('metadataModal')).show();
+        }
+
+        function addToHistory() {
+            const history = JSON.parse(localStorage.getItem('ocrHistory') || '[]');
+            history.unshift({
+                filename: currentResult.filename,
+                confidence: currentResult.confidence,
+                timestamp: new Date().toLocaleString(),
+                textLength: currentResult.text.length
+            });
+            
+            // Mantener solo los últimos 10
+            if (history.length > 10) {
+                history.splice(10);
+            }
+            
+            localStorage.setItem('ocrHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('ocrHistory') || '[]');
+            const container = document.getElementById('historyContainer');
+            
+            if (history.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No hay procesamiento reciente</p>';
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <strong>${item.filename}</strong>
+                    <br>
+                    <small class="text-muted">
+                        ${item.timestamp} • ${item.confidence}% • ${item.textLength} chars
+                    </small>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            const history = JSON.parse(localStorage.getItem('ocrHistory') || '[]');
+            document.getElementById('totalProcessed').textContent = history.length;
+            
+            if (history.length > 0) {
+                const avgConfidence = history.reduce((sum, item) => sum + item.confidence, 0) / history.length;
+                document.getElementById('avgConfidence').textContent = `${avgConfidence.toFixed(1)}%`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+/* 
+TEMA PERSONALIZADO LUCAS - SDK MICROSERVICIOS
+Creado: Diciembre 2025
+*/
+
+:root {
+    /* Colores principales */
+    --color-primario: #667eea;
+    --color-secundario: #764ba2;
+    --color-acento: #ff6b6b;
+    --color-exito: #1cc88a;
+    --color-advertencia: #f6c23e;
+    --color-peligro: #e74c3c;
+    
+    /* Gradientes */
+    --gradiente-principal: linear-gradient(135deg, var(--color-primario) 0%, var(--color-secundario) 100%);
+    --gradiente-fondo: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --gradiente-tarjeta: linear-gradient(135deg, #fff 0%, #f8f9ff 100%);
+    
+    /* Sombras */
+    --sombra-suave: 0 8px 25px rgba(0, 0, 0, 0.1);
+    --sombra-hover: 0 15px 35px rgba(0, 0, 0, 0.2);
+    
+    /* Tipografía */
+    --fuente-principal: 'Poppins', sans-serif;
+    --peso-normal: 400;
+    --peso-medio: 500;
+    --peso-bold: 600;
+}
+
+/* Aplicar tema */
+body {
+    font-family: var(--fuente-principal);
+    background: var(--gradiente-fondo);
+}
+
+.sidebar-lucas {
+    background: var(--gradiente-principal);
+    box-shadow: 2px 0 15px rgba(0,0,0,0.15);
+}
+
+.card-lucas {
+    background: var(--gradiente-tarjeta);
+    box-shadow: var(--sombra-suave);
+    border-radius: 20px;
+    border: none;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-lucas:hover {
+    box-shadow: var(--sombra-hover);
+    transform: translateY(-8px) scale(1.02);
+}
+
+.btn-lucas {
+    background: var(--gradiente-principal);
+    border: none;
+    border-radius: 30px;
+    padding: 12px 30px;
+    font-weight: var(--peso-medio);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-lucas:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.titulo-lucas {
+    font-weight: var(--peso-bold);
+    color: var(--color-primario);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animacion-entrada {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card-lucas {
+        margin-bottom: 20px;
+    }
+    
+    .btn-lucas {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+/* Tema oscuro (opcional) */
+.tema-oscuro {
+    --gradiente-fondo: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --gradiente-tarjeta: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    color: #ecf0f1;
+}
+
+.tema-oscuro .card-lucas {
+    background: var(--gradiente-tarjeta);
+    color: #ecf0f1;
+}
+
+.tema-oscuro .titulo-lucas {
+    color: #ecf0f1;
+}

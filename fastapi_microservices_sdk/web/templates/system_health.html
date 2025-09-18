@@ -1,0 +1,592 @@
+{% extends "base.html" %}
+{% block title %}System Health & Diagnostics{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/system_health.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.css">
+{% endblock %}
+{% block content %}
+<div class="health-container">
+    <!-- Header -->
+    <div class="health-header">
+        <div class="header-content">
+            <h1><i class="fas fa-heartbeat"></i> System Health & Diagnostics</h1>
+            <p>Real-time system monitoring and performance analysis</p>
+        </div>
+        <div class="header-actions">
+            <button id="refresh-all" class="btn btn-primary">
+                <i class="fas fa-sync-alt"></i> Refresh All
+            </button>
+            <button id="export-report" class="btn btn-secondary">
+                <i class="fas fa-download"></i> Export Report
+            </button>
+            <button id="run-diagnostics" class="btn btn-success">
+                <i class="fas fa-stethoscope"></i> Run Diagnostics
+            </button>
+        </div>
+    </div>
+
+    <!-- System Status Overview -->
+    <div class="status-overview">
+        <div class="status-card overall-status" id="overall-status">
+            <div class="status-icon">
+                <i class="fas fa-circle" id="overall-status-icon"></i>
+            </div>
+            <div class="status-content">
+                <h3 id="overall-status-text">Checking...</h3>
+                <p id="overall-status-desc">System health check in progress</p>
+                <small id="last-check-time">Last check: --</small>
+            </div>
+            <div class="status-score">
+                <div class="score-circle">
+                    <span id="health-score">--</span>
+                    <small>/100</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-metrics">
+            <div class="metric-card">
+                <div class="metric-icon cpu">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <div class="metric-content">
+                    <h4 id="cpu-usage">--%</h4>
+                    <p>CPU Usage</p>
+                    <div class="metric-trend" id="cpu-trend">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>Stable</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon memory">
+                    <i class="fas fa-memory"></i>
+                </div>
+                <div class="metric-content">
+                    <h4 id="memory-usage">--%</h4>
+                    <p>Memory Usage</p>
+                    <div class="metric-trend" id="memory-trend">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>Stable</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon disk">
+                    <i class="fas fa-hdd"></i>
+                </div>
+                <div class="metric-content">
+                    <h4 id="disk-usage">--%</h4>
+                    <p>Disk Usage</p>
+                    <div class="metric-trend" id="disk-trend">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>Stable</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon network">
+                    <i class="fas fa-network-wired"></i>
+                </div>
+                <div class="metric-content">
+                    <h4 id="network-connections">--</h4>
+                    <p>Active Connections</p>
+                    <div class="metric-trend" id="network-trend">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>Stable</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon uptime">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="metric-content">
+                    <h4 id="system-uptime">--</h4>
+                    <p>System Uptime</p>
+                    <div class="metric-trend" id="uptime-trend">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Running</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon alerts">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="metric-content">
+                    <h4 id="active-alerts">--</h4>
+                    <p>Active Alerts</p>
+                    <div class="metric-trend" id="alerts-trend">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>Monitoring</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Tabs -->
+    <div class="health-tabs">
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="overview">
+                <i class="fas fa-tachometer-alt"></i> Overview
+            </button>
+            <button class="tab-btn" data-tab="resources">
+                <i class="fas fa-server"></i> Resources
+            </button>
+            <button class="tab-btn" data-tab="components">
+                <i class="fas fa-puzzle-piece"></i> Components
+            </button>
+            <button class="tab-btn" data-tab="alerts">
+                <i class="fas fa-bell"></i> Alerts
+            </button>
+            <button class="tab-btn" data-tab="performance">
+                <i class="fas fa-chart-line"></i> Performance
+            </button>
+            <button class="tab-btn" data-tab="diagnostics">
+                <i class="fas fa-tools"></i> Diagnostics
+            </button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overview-tab" class="tab-content active">
+            <div class="overview-grid">
+                <!-- Real-time Charts -->
+                <div class="chart-section">
+                    <h3><i class="fas fa-chart-area"></i> Real-time Metrics</h3>
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <h4>CPU & Memory Usage</h4>
+                            <canvas id="cpu-memory-chart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h4>Network I/O</h4>
+                            <canvas id="network-io-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Information -->
+                <div class="system-info-section">
+                    <h3><i class="fas fa-info-circle"></i> System Information</h3>
+                    <div class="info-grid" id="system-info-grid">
+                        <!-- System info will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-section">
+                    <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                    <div class="activity-feed" id="activity-feed">
+                        <!-- Activity items will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resources Tab -->
+        <div id="resources-tab" class="tab-content">
+            <div class="resources-grid">
+                <!-- Resource Usage Charts -->
+                <div class="resource-charts">
+                    <div class="chart-container">
+                        <h4>CPU Usage History</h4>
+                        <canvas id="cpu-history-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Memory Usage History</h4>
+                        <canvas id="memory-history-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h4>Disk I/O</h4>
+                        <canvas id="disk-io-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Processes -->
+                <div class="processes-section">
+                    <h4><i class="fas fa-list"></i> Top Processes</h4>
+                    <div class="process-controls">
+                        <select id="process-sort">
+                            <option value="cpu">Sort by CPU</option>
+                            <option value="memory">Sort by Memory</option>
+                        </select>
+                        <button id="refresh-processes" class="btn btn-sm">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="processes-table" id="processes-table">
+                        <!-- Processes table will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Disk Usage -->
+                <div class="disk-section">
+                    <h4><i class="fas fa-hdd"></i> Disk Usage</h4>
+                    <div class="disk-partitions" id="disk-partitions">
+                        <!-- Disk partitions will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Components Tab -->
+        <div id="components-tab" class="tab-content">
+            <div class="components-grid">
+                <!-- Component Health Status -->
+                <div class="components-status">
+                    <h4><i class="fas fa-puzzle-piece"></i> Component Health</h4>
+                    <div class="components-list" id="components-list">
+                        <!-- Components will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Health Check Configuration -->
+                <div class="health-config">
+                    <h4><i class="fas fa-cog"></i> Health Check Configuration</h4>
+                    <div class="config-form">
+                        <div class="form-group">
+                            <label>Check Interval (seconds):</label>
+                            <input type="number" id="check-interval" value="30" min="10" max="300">
+                        </div>
+                        <div class="form-group">
+                            <label>Alert Thresholds:</label>
+                            <div class="threshold-inputs">
+                                <div class="threshold-item">
+                                    <label>CPU (%):</label>
+                                    <input type="number" id="cpu-threshold" value="80" min="1" max="100">
+                                </div>
+                                <div class="threshold-item">
+                                    <label>Memory (%):</label>
+                                    <input type="number" id="memory-threshold" value="85" min="1" max="100">
+                                </div>
+                                <div class="threshold-item">
+                                    <label>Disk (%):</label>
+                                    <input type="number" id="disk-threshold" value="90" min="1" max="100">
+                                </div>
+                            </div>
+                        </div>
+                        <button id="save-config" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Configuration
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Custom Health Check -->
+                <div class="custom-health-check">
+                    <h4><i class="fas fa-plus"></i> Add Custom Health Check</h4>
+                    <div class="custom-check-form">
+                        <div class="form-group">
+                            <label>Check Name:</label>
+                            <input type="text" id="custom-check-name" placeholder="Enter check name">
+                        </div>
+                        <div class="form-group">
+                            <label>Check Type:</label>
+                            <select id="custom-check-type">
+                                <option value="http">HTTP Endpoint</option>
+                                <option value="tcp">TCP Port</option>
+                                <option value="custom">Custom Function</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="http-config" style="display: none;">
+                            <label>URL:</label>
+                            <input type="url" id="http-url" placeholder="https://example.com/health">
+                            <label>Expected Status:</label>
+                            <input type="number" id="http-status" value="200">
+                        </div>
+                        <div class="form-group" id="tcp-config" style="display: none;">
+                            <label>Host:</label>
+                            <input type="text" id="tcp-host" placeholder="localhost">
+                            <label>Port:</label>
+                            <input type="number" id="tcp-port" placeholder="8080">
+                        </div>
+                        <button id="add-custom-check" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Add Health Check
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Tab -->
+        <div id="alerts-tab" class="tab-content">
+            <div class="alerts-container">
+                <!-- Alert Summary -->
+                <div class="alert-summary">
+                    <div class="summary-card critical">
+                        <div class="summary-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h4 id="critical-alerts-count">0</h4>
+                            <p>Critical Alerts</p>
+                        </div>
+                    </div>
+                    <div class="summary-card warning">
+                        <div class="summary-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h4 id="warning-alerts-count">0</h4>
+                            <p>Warning Alerts</p>
+                        </div>
+                    </div>
+                    <div class="summary-card resolved">
+                        <div class="summary-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h4 id="resolved-alerts-count">0</h4>
+                            <p>Resolved Today</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Filters -->
+                <div class="alert-filters">
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select id="alert-status-filter">
+                            <option value="">All Alerts</option>
+                            <option value="active">Active Only</option>
+                            <option value="resolved">Resolved Only</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Severity:</label>
+                        <select id="alert-severity-filter">
+                            <option value="">All Severities</option>
+                            <option value="critical">Critical</option>
+                            <option value="warning">Warning</option>
+                            <option value="info">Info</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Component:</label>
+                        <select id="alert-component-filter">
+                            <option value="">All Components</option>
+                        </select>
+                    </div>
+                    <button id="clear-filters" class="btn btn-outline">
+                        <i class="fas fa-times"></i> Clear Filters
+                    </button>
+                </div>
+
+                <!-- Alerts List -->
+                <div class="alerts-list" id="alerts-list">
+                    <!-- Alerts will be populated here -->
+                </div>
+
+                <!-- Alert Actions -->
+                <div class="alert-actions">
+                    <button id="resolve-selected" class="btn btn-success" disabled>
+                        <i class="fas fa-check"></i> Resolve Selected
+                    </button>
+                    <button id="acknowledge-selected" class="btn btn-warning" disabled>
+                        <i class="fas fa-eye"></i> Acknowledge Selected
+                    </button>
+                    <button id="export-alerts" class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Export Alerts
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Tab -->
+        <div id="performance-tab" class="tab-content">
+            <div class="performance-container">
+                <!-- Performance Score -->
+                <div class="performance-score-section">
+                    <div class="score-card">
+                        <div class="score-circle-large">
+                            <span id="performance-score">--</span>
+                            <small>/100</small>
+                        </div>
+                        <h3>Performance Score</h3>
+                        <p id="performance-status">Analyzing...</p>
+                    </div>
+                    <div class="score-breakdown">
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">CPU Performance:</span>
+                            <div class="breakdown-bar">
+                                <div class="breakdown-fill" id="cpu-performance-bar"></div>
+                            </div>
+                            <span id="cpu-performance-score">--</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">Memory Performance:</span>
+                            <div class="breakdown-bar">
+                                <div class="breakdown-fill" id="memory-performance-bar"></div>
+                            </div>
+                            <span id="memory-performance-score">--</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label">I/O Performance:</span>
+                            <div class="breakdown-bar">
+                                <div class="breakdown-fill" id="io-performance-bar"></div>
+                            </div>
+                            <span id="io-performance-score">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Trends -->
+                <div class="performance-trends">
+                    <h4><i class="fas fa-chart-line"></i> Performance Trends</h4>
+                    <div class="trend-charts">
+                        <canvas id="performance-trend-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bottlenecks -->
+                <div class="bottlenecks-section">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Identified Bottlenecks</h4>
+                    <div class="bottlenecks-list" id="bottlenecks-list">
+                        <!-- Bottlenecks will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Optimization Recommendations -->
+                <div class="recommendations-section">
+                    <h4><i class="fas fa-lightbulb"></i> Optimization Recommendations</h4>
+                    <div class="recommendations-list" id="recommendations-list">
+                        <!-- Recommendations will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagnostics Tab -->
+        <div id="diagnostics-tab" class="tab-content">
+            <div class="diagnostics-container">
+                <!-- Diagnostic Tools -->
+                <div class="diagnostic-tools">
+                    <h4><i class="fas fa-tools"></i> Diagnostic Tools</h4>
+                    <div class="tools-grid">
+                        <div class="tool-card">
+                            <div class="tool-icon">
+                                <i class="fas fa-stethoscope"></i>
+                            </div>
+                            <div class="tool-content">
+                                <h5>System Health Check</h5>
+                                <p>Comprehensive system health analysis</p>
+                                <button class="btn btn-primary" onclick="runSystemHealthCheck()">
+                                    <i class="fas fa-play"></i> Run Check
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="tool-card">
+                            <div class="tool-icon">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <div class="tool-content">
+                                <h5>Performance Benchmark</h5>
+                                <p>Benchmark system performance</p>
+                                <button class="btn btn-primary" onclick="runPerformanceBenchmark()">
+                                    <i class="fas fa-play"></i> Run Benchmark
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="tool-card">
+                            <div class="tool-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="tool-content">
+                                <h5>Resource Analysis</h5>
+                                <p>Analyze resource usage patterns</p>
+                                <button class="btn btn-primary" onclick="runResourceAnalysis()">
+                                    <i class="fas fa-play"></i> Analyze
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="tool-card">
+                            <div class="tool-icon">
+                                <i class="fas fa-bug"></i>
+                            </div>
+                            <div class="tool-content">
+                                <h5>Troubleshoot Issues</h5>
+                                <p>Automated issue detection and resolution</p>
+                                <button class="btn btn-primary" onclick="runTroubleshoot()">
+                                    <i class="fas fa-play"></i> Troubleshoot
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagnostic Results -->
+                <div class="diagnostic-results">
+                    <h4><i class="fas fa-clipboard-list"></i> Diagnostic Results</h4>
+                    <div class="results-container" id="diagnostic-results">
+                        <div class="results-placeholder">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Run diagnostic tools to see results here</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Logs -->
+                <div class="system-logs">
+                    <h4><i class="fas fa-file-alt"></i> System Logs</h4>
+                    <div class="log-controls">
+                        <select id="log-level">
+                            <option value="">All Levels</option>
+                            <option value="error">Error</option>
+                            <option value="warning">Warning</option>
+                            <option value="info">Info</option>
+                            <option value="debug">Debug</option>
+                        </select>
+                        <input type="text" id="log-search" placeholder="Search logs...">
+                        <button id="refresh-logs" class="btn btn-sm">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="logs-container" id="system-logs-container">
+                        <!-- Logs will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Loading system diagnostics...</p>
+    </div>
+</div>
+
+<!-- Alert Modal -->
+<div id="alert-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Alert Details</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body" id="alert-modal-body">
+            <!-- Alert details will be populated here -->
+        </div>
+        <div class="modal-footer">
+            <button id="resolve-alert" class="btn btn-success">Resolve</button>
+            <button id="acknowledge-alert" class="btn btn-warning">Acknowledge</button>
+            <button class="btn btn-secondary modal-close">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="{{ url_for('static', path='/js/system_health.js') }}"></script>
+{% endblock %}

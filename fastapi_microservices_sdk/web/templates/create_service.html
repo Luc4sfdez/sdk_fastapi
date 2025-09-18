@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Create Service - FastAPI Microservices SDK{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-plus text-success"></i> Create New Service
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="/" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Service Creation Form -->
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cog"></i> Service Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="createServiceForm">
+                    <!-- Basic Information -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="serviceName" class="form-label">Service Name *</label>
+                            <input type="text" class="form-control" id="serviceName" name="service_name" 
+                                   placeholder="my-awesome-service" required>
+                            <div class="form-text">Use lowercase letters, numbers, and hyphens only</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="servicePort" class="form-label">Port</label>
+                            <input type="number" class="form-control" id="servicePort" name="service_port" 
+                                   value="8000" min="1000" max="65535">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="serviceDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="serviceDescription" name="description" 
+                                  rows="2" placeholder="Brief description of your service"></textarea>
+                    </div>
+                    
+                    <!-- Template Selection -->
+                    <div class="mb-3">
+                        <label for="templateSelect" class="form-label">Service Template *</label>
+                        <select class="form-select" id="templateSelect" name="template" required>
+                            <option value="">Choose a template...</option>
+                            {% for template in templates %}
+                            <option value="{{ template.id }}" 
+                                    data-description="{{ template.description }}"
+                                    data-category="{{ template.category.value }}">
+                                {{ template.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div id="templateDescription" class="form-text"></div>
+                    </div>
+                    
+                    <!-- Advanced Options -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#advancedOptions">
+                                    <i class="fas fa-cog"></i> Advanced Options
+                                </button>
+                            </h6>
+                        </div>
+                        <div id="advancedOptions" class="collapse">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="author" class="form-label">Author</label>
+                                        <input type="text" class="form-control" id="author" name="author" 
+                                               value="Developer">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="version" class="form-label">Version</label>
+                                        <input type="text" class="form-control" id="version" name="version" 
+                                               value="1.0.0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btn-outline-secondary me-md-2" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-rocket"></i> Create Service
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Template Preview -->
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-eye"></i> Template Preview
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="templatePreview">
+                    <p class="text-muted">Select a template to see preview</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Progress -->
+        <div class="card shadow mt-3" id="progressCard" style="display: none;">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-spinner fa-spin"></i> Creating Service...
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%"></div>
+                </div>
+                <div id="progressText" class="mt-2 text-center">Initializing...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Template selection handler
+document.getElementById('templateSelect').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const description = selectedOption.getAttribute('data-description');
+    const category = selectedOption.getAttribute('data-category');
+    
+    const previewDiv = document.getElementById('templatePreview');
+    
+    if (selectedOption.value) {
+        previewDiv.innerHTML = `
+            <h6>${selectedOption.text}</h6>
+            <p class="text-muted">${description}</p>
+            <span class="badge bg-info">${category}</span>
+        `;
+    } else {
+        previewDiv.innerHTML = '<p class="text-muted">Select a template to see preview</p>';
+    }
+});
+
+// Form submission handler
+document.getElementById('createServiceForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    
+    // Show progress
+    document.getElementById('progressCard').style.display = 'block';
+    updateProgress(25, 'Validating configuration...');
+    
+    try {
+        const response = await fetch('/api/create-service', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        updateProgress(75, 'Generating service files...');
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            updateProgress(100, 'Service created successfully!');
+            setTimeout(() => {
+                window.location.href = `/service/${data.service_name}`;
+            }, 2000);
+        } else {
+            throw new Error(result.detail || 'Failed to create service');
+        }
+        
+    } catch (error) {
+        updateProgress(0, `Error: ${error.message}`);
+        setTimeout(() => {
+            document.getElementById('progressCard').style.display = 'none';
+        }, 3000);
+    }
+});
+
+function updateProgress(percent, text) {
+    const progressBar = document.querySelector('.progress-bar');
+    const progressText = document.getElementById('progressText');
+    
+    progressBar.style.width = `${percent}%`;
+    progressText.textContent = text;
+    
+    if (percent === 100) {
+        progressBar.classList.remove('progress-bar-animated');
+        progressBar.classList.add('bg-success');
+    }
+}
+
+function resetForm() {
+    document.getElementById('createServiceForm').reset();
+    document.getElementById('templatePreview').innerHTML = '<p class="text-muted">Select a template to see preview</p>';
+}
+</script>
+{% endblock %}

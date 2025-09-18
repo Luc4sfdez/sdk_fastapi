@@ -1,0 +1,50 @@
+# fastapi-microservices-sdk/fastapi_microservices_sdk/constants.py 
+"""
+Constants used throughout the FastAPI Microservices SDK.
+"""
+
+# Service defaults
+DEFAULT_SERVICE_HOST = "0.0.0.0"
+DEFAULT_SERVICE_PORT = 8000
+DEFAULT_TIMEOUT = 30
+DEFAULT_RETRY_ATTEMPTS = 3
+DEFAULT_RETRY_DELAY = 1
+
+# Health check
+HEALTH_CHECK_PATH = "/health"
+HEALTH_CHECK_INTERVAL = 30
+
+# Metrics
+METRICS_PATH = "/metrics"
+METRICS_PORT = 9090
+
+# Service discovery
+SERVICE_REGISTRY_TTL = 60
+SERVICE_HEARTBEAT_INTERVAL = 30
+
+# Circuit breaker
+CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5
+CIRCUIT_BREAKER_RECOVERY_TIMEOUT = 60
+CIRCUIT_BREAKER_EXPECTED_EXCEPTION = Exception
+
+# HTTP headers
+SERVICE_NAME_HEADER = "X-Service-Name"
+REQUEST_ID_HEADER = "X-Request-ID"
+TRACE_ID_HEADER = "X-Trace-ID"
+
+# Environment variables
+ENV_SERVICE_NAME = "SERVICE_NAME"
+ENV_SERVICE_PORT = "SERVICE_PORT"
+ENV_SERVICE_HOST = "SERVICE_HOST"
+ENV_ENVIRONMENT = "ENVIRONMENT"
+
+# Service types
+SERVICE_TYPE_API = "api"
+SERVICE_TYPE_WORKER = "worker"
+SERVICE_TYPE_GATEWAY = "gateway"
+SERVICE_TYPE_AUTH = "auth"
+
+# Status codes
+STATUS_HEALTHY = "healthy"
+STATUS_UNHEALTHY = "unhealthy"
+STATUS_DEGRADED = "degraded"

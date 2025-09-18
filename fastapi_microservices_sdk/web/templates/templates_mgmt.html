@@ -1,0 +1,614 @@
+{% extends "base.html" %}
+
+{% block title %}Template Management{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/templates_mgmt.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/eclipse.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="template-mgmt-container">
+    <!-- Header -->
+    <div class="template-mgmt-header">
+        <div class="header-content">
+            <h1><i class="fas fa-code"></i> Template Management</h1>
+            <p>Create, edit, and manage custom templates with advanced validation and analytics</p>
+        </div>
+        
+        <div class="header-actions">
+            <button id="new-template-btn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Template
+            </button>
+            <button id="import-template-btn" class="btn btn-secondary">
+                <i class="fas fa-upload"></i> Import
+            </button>
+            <div class="view-toggle">
+                <button id="grid-view-btn" class="btn btn-outline active">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button id="list-view-btn" class="btn btn-outline">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="template-mgmt-main">
+        <!-- Sidebar -->
+        <div class="template-mgmt-sidebar">
+            <!-- Search and Filters -->
+            <div class="sidebar-section">
+                <h3><i class="fas fa-search"></i> Search & Filter</h3>
+                <div class="search-container">
+                    <input type="text" id="template-search" placeholder="Search templates...">
+                    <button id="search-btn" class="btn btn-sm btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Type:</label>
+                        <select id="type-filter">
+                            <option value="">All Types</option>
+                            <option value="service">Service</option>
+                            <option value="api">API</option>
+                            <option value="model">Model</option>
+                            <option value="database">Database</option>
+                            <option value="docker">Docker</option>
+                            <option value="kubernetes">Kubernetes</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select id="status-filter">
+                            <option value="">All Status</option>
+                            <option value="draft">Draft</option>
+                            <option value="active">Active</option>
+                            <option value="deprecated">Deprecated</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Author:</label>
+                        <select id="author-filter">
+                            <option value="">All Authors</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button id="clear-filters" class="btn btn-sm btn-outline">Clear Filters</button>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="sidebar-section">
+                <h3><i class="fas fa-chart-bar"></i> Quick Stats</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value" id="total-templates">0</span>
+                        <span class="stat-label">Total Templates</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="active-templates">0</span>
+                        <span class="stat-label">Active</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="my-templates">0</span>
+                        <span class="stat-label">My Templates</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="shared-templates">0</span>
+                        <span class="stat-label">Shared</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="sidebar-section">
+                <h3><i class="fas fa-clock"></i> Recent Activity</h3>
+                <div id="recent-activity" class="activity-list">
+                    <!-- Activity items will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="template-mgmt-content">
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" data-tab="browse">
+                    <i class="fas fa-folder-open"></i> Browse Templates
+                </button>
+                <button class="tab-btn" data-tab="editor">
+                    <i class="fas fa-edit"></i> Template Editor
+                </button>
+                <button class="tab-btn" data-tab="analytics">
+                    <i class="fas fa-analytics"></i> Analytics
+                </button>
+                <button class="tab-btn" data-tab="validation">
+                    <i class="fas fa-check-circle"></i> Validation
+                </button>
+            </div>
+
+            <!-- Browse Templates Tab -->
+            <div id="browse-tab" class="tab-content active">
+                <div class="browse-header">
+                    <div class="sort-controls">
+                        <label>Sort by:</label>
+                        <select id="sort-select">
+                            <option value="name">Name</option>
+                            <option value="created">Created Date</option>
+                            <option value="updated">Updated Date</option>
+                            <option value="usage">Usage Count</option>
+                            <option value="rating">Rating</option>
+                        </select>
+                        <button id="sort-order" class="btn btn-sm btn-outline">
+                            <i class="fas fa-sort-amount-down"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="pagination-info">
+                        <span id="results-count">0 templates found</span>
+                    </div>
+                </div>
+                
+                <div id="templates-container" class="templates-container grid-view">
+                    <!-- Templates will be loaded here -->
+                </div>
+                
+                <div class="pagination">
+                    <button id="prev-page" class="btn btn-outline" disabled>
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <span id="page-info">Page 1 of 1</span>
+                    <button id="next-page" class="btn btn-outline" disabled>
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Template Editor Tab -->
+            <div id="editor-tab" class="tab-content">
+                <div class="editor-container">
+                    <!-- Editor Header -->
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <input type="text" id="template-name" placeholder="Template Name" class="title-input">
+                            <span class="template-status" id="template-status">Draft</span>
+                        </div>
+                        
+                        <div class="editor-actions">
+                            <button id="save-template" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button id="validate-template" class="btn btn-secondary">
+                                <i class="fas fa-check"></i> Validate
+                            </button>
+                            <button id="preview-template" class="btn btn-outline">
+                                <i class="fas fa-eye"></i> Preview
+                            </button>
+                            <button id="test-template" class="btn btn-outline">
+                                <i class="fas fa-flask"></i> Test
+                            </button>
+                            <div class="dropdown">
+                                <button id="more-actions" class="btn btn-outline dropdown-toggle">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a href="#" id="export-template">Export</a>
+                                    <a href="#" id="share-template">Share</a>
+                                    <a href="#" id="duplicate-template">Duplicate</a>
+                                    <a href="#" id="delete-template">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Editor Content -->
+                    <div class="editor-content">
+                        <!-- Left Panel - Metadata -->
+                        <div class="editor-metadata">
+                            <div class="metadata-section">
+                                <h4>Template Information</h4>
+                                <div class="form-group">
+                                    <label>Description:</label>
+                                    <textarea id="template-description" placeholder="Template description..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Type:</label>
+                                    <select id="template-type">
+                                        <option value="service">Service</option>
+                                        <option value="api">API</option>
+                                        <option value="model">Model</option>
+                                        <option value="database">Database</option>
+                                        <option value="docker">Docker</option>
+                                        <option value="kubernetes">Kubernetes</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Version:</label>
+                                    <input type="text" id="template-version" value="1.0.0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Tags:</label>
+                                    <input type="text" id="template-tags" placeholder="tag1, tag2, tag3">
+                                </div>
+                            </div>
+
+                            <div class="metadata-section">
+                                <h4>Variables</h4>
+                                <div id="variables-container">
+                                    <!-- Variables will be auto-detected and shown here -->
+                                </div>
+                                <button id="add-variable" class="btn btn-sm btn-outline">
+                                    <i class="fas fa-plus"></i> Add Variable
+                                </button>
+                            </div>
+
+                            <div class="metadata-section">
+                                <h4>Files</h4>
+                                <div id="files-container">
+                                    <!-- Additional files will be shown here -->
+                                </div>
+                                <button id="add-file" class="btn btn-sm btn-outline">
+                                    <i class="fas fa-plus"></i> Add File
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Center Panel - Code Editor -->
+                        <div class="editor-main">
+                            <div class="editor-toolbar">
+                                <div class="editor-mode">
+                                    <label>Language:</label>
+                                    <select id="editor-language">
+                                        <option value="text">Plain Text</option>
+                                        <option value="python">Python</option>
+                                        <option value="javascript">JavaScript</option>
+                                        <option value="yaml">YAML</option>
+                                        <option value="json">JSON</option>
+                                        <option value="dockerfile">Dockerfile</option>
+                                        <option value="html">HTML</option>
+                                        <option value="css">CSS</option>
+                                        <option value="sql">SQL</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="editor-theme">
+                                    <label>Theme:</label>
+                                    <select id="editor-theme">
+                                        <option value="default">Default</option>
+                                        <option value="monokai">Monokai</option>
+                                        <option value="eclipse">Eclipse</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="editor-options">
+                                    <label>
+                                        <input type="checkbox" id="line-numbers" checked> Line Numbers
+                                    </label>
+                                    <label>
+                                        <input type="checkbox" id="word-wrap"> Word Wrap
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="code-editor-container">
+                                <textarea id="code-editor" placeholder="Enter your template content here..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel - Preview/Validation -->
+                        <div class="editor-preview">
+                            <div class="preview-tabs">
+                                <button class="preview-tab active" data-preview="preview">Preview</button>
+                                <button class="preview-tab" data-preview="validation">Validation</button>
+                                <button class="preview-tab" data-preview="test">Test</button>
+                            </div>
+                            
+                            <div id="preview-content" class="preview-content active">
+                                <div class="preview-placeholder">
+                                    <i class="fas fa-eye"></i>
+                                    <p>Preview will appear here</p>
+                                </div>
+                            </div>
+                            
+                            <div id="validation-content" class="preview-content">
+                                <div class="validation-results">
+                                    <!-- Validation results will appear here -->
+                                </div>
+                            </div>
+                            
+                            <div id="test-content" class="preview-content">
+                                <div class="test-interface">
+                                    <h4>Test Template</h4>
+                                    <div id="test-parameters">
+                                        <!-- Test parameters will appear here -->
+                                    </div>
+                                    <button id="run-test" class="btn btn-primary">Run Test</button>
+                                    <div id="test-results">
+                                        <!-- Test results will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" class="tab-content">
+                <div class="analytics-dashboard">
+                    <div class="analytics-header">
+                        <h3>Template Analytics</h3>
+                        <div class="analytics-controls">
+                            <select id="analytics-template">
+                                <option value="">Select template...</option>
+                            </select>
+                            <select id="analytics-period">
+                                <option value="7">Last 7 days</option>
+                                <option value="30">Last 30 days</option>
+                                <option value="90">Last 90 days</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-content">
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h3 id="usage-count">0</h3>
+                                    <p>Total Uses</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h3 id="unique-users">0</h3>
+                                    <p>Unique Users</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h3 id="success-rate">0%</h3>
+                                    <p>Success Rate</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <div class="metric-icon">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h3 id="quality-score">0</h3>
+                                    <p>Quality Score</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="charts-section">
+                            <div class="chart-container">
+                                <h4>Usage Trend</h4>
+                                <canvas id="usage-trend-chart"></canvas>
+                            </div>
+                            
+                            <div class="chart-container">
+                                <h4>Performance Metrics</h4>
+                                <canvas id="performance-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="insights-section">
+                            <h4>Insights & Recommendations</h4>
+                            <div id="recommendations-list">
+                                <!-- Recommendations will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validation Tab -->
+            <div id="validation-tab" class="tab-content">
+                <div class="validation-dashboard">
+                    <div class="validation-header">
+                        <h3>Template Validation</h3>
+                        <div class="validation-controls">
+                            <select id="validation-template">
+                                <option value="">Select template...</option>
+                            </select>
+                            <button id="run-validation" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Run Validation
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="validation-content">
+                        <div class="validation-summary">
+                            <div class="summary-card">
+                                <div class="summary-icon success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="summary-content">
+                                    <h3 id="validation-score">0</h3>
+                                    <p>Validation Score</p>
+                                </div>
+                            </div>
+                            
+                            <div class="summary-card">
+                                <div class="summary-icon error">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="summary-content">
+                                    <h3 id="error-count">0</h3>
+                                    <p>Errors</p>
+                                </div>
+                            </div>
+                            
+                            <div class="summary-card">
+                                <div class="summary-icon warning">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                </div>
+                                <div class="summary-content">
+                                    <h3 id="warning-count">0</h3>
+                                    <p>Warnings</p>
+                                </div>
+                            </div>
+                            
+                            <div class="summary-card">
+                                <div class="summary-icon info">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <div class="summary-content">
+                                    <h3 id="info-count">0</h3>
+                                    <p>Info</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="validation-details">
+                            <div class="validation-issues">
+                                <h4>Validation Issues</h4>
+                                <div id="validation-issues-list">
+                                    <!-- Validation issues will appear here -->
+                                </div>
+                            </div>
+                            
+                            <div class="validation-suggestions">
+                                <h4>Suggestions</h4>
+                                <div id="validation-suggestions-list">
+                                    <!-- Suggestions will appear here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Template Modal -->
+<div id="new-template-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Create New Template</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="new-template-name">Template Name:</label>
+                <input type="text" id="new-template-name" placeholder="Enter template name">
+            </div>
+            <div class="form-group">
+                <label for="new-template-type">Template Type:</label>
+                <select id="new-template-type">
+                    <option value="service">Service</option>
+                    <option value="api">API</option>
+                    <option value="model">Model</option>
+                    <option value="database">Database</option>
+                    <option value="docker">Docker</option>
+                    <option value="kubernetes">Kubernetes</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="new-template-description">Description:</label>
+                <textarea id="new-template-description" placeholder="Template description"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="new-template-starter">Start from:</label>
+                <select id="new-template-starter">
+                    <option value="blank">Blank Template</option>
+                    <option value="existing">Copy from Existing</option>
+                    <option value="builtin">Built-in Template</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="create-template-confirm" class="btn btn-primary">Create</button>
+            <button id="create-template-cancel" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Import Template Modal -->
+<div id="import-template-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Import Template</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="import-options">
+                <div class="import-option">
+                    <input type="radio" id="import-file" name="import-type" value="file" checked>
+                    <label for="import-file">Import from File</label>
+                    <div class="import-details">
+                        <input type="file" id="template-file" accept=".json,.yaml,.yml,.zip">
+                        <p class="help-text">Supported formats: JSON, YAML, ZIP</p>
+                    </div>
+                </div>
+                <div class="import-option">
+                    <input type="radio" id="import-url" name="import-type" value="url">
+                    <label for="import-url">Import from URL</label>
+                    <div class="import-details">
+                        <input type="url" id="template-url" placeholder="https://example.com/template.json">
+                    </div>
+                </div>
+                <div class="import-option">
+                    <input type="radio" id="import-text" name="import-type" value="text">
+                    <label for="import-text">Import from Text</label>
+                    <div class="import-details">
+                        <textarea id="template-text" placeholder="Paste template content here..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="import-template-confirm" class="btn btn-primary">Import</button>
+            <button id="import-template-cancel" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Loading...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/yaml/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/dockerfile/dockerfile.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="{{ url_for('static', path='/js/templates_mgmt.js') }}"></script>
+{% endblock %}

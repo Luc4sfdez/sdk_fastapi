@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: .
+    ports:
+      - "8092:8092"
+    environment:
+      - ENVIRONMENT=development
+      - PORT=8092
+      - SERVICES={"auth":"http://auth-service:8001","users":"http://user-service:8002"}
+    depends_on:
+      - auth-service
+      - user-service
+    restart: unless-stopped
+
+  # Example services (uncomment and configure as needed)
+  # auth-service:
+  #   image: your-auth-service:latest
+  #   ports:
+  #     - "8001:8001"
+  
+  # user-service:
+  #   image: your-user-service:latest
+  #   ports:
+  #     - "8002:8002"

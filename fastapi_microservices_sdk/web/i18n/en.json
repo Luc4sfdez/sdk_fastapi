@@ -1,0 +1,73 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to Microservices SDK",
+    "create_service": "Create Service",
+    "available_templates": "Available Templates",
+    "services_created": "Services Created",
+    "active_services": "Active Services",
+    "system_health": "System Health"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "services": "Services",
+    "templates": "Templates",
+    "logs": "Logs",
+    "configuration": "Configuration",
+    "monitoring": "Monitoring",
+    "documentation": "Documentation"
+  },
+  "services": {
+    "title": "Service Management",
+    "create_new": "Create New Service",
+    "name": "Name",
+    "port": "Port",
+    "status": "Status",
+    "actions": "Actions",
+    "start": "Start",
+    "stop": "Stop",
+    "restart": "Restart",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view_logs": "View Logs"
+  },
+  "templates": {
+    "title": "Service Templates",
+    "description": "Description",
+    "category": "Category",
+    "use_template": "Use Template",
+    "data_service": "Data Service",
+    "auth_service": "Authentication Service",
+    "api_gateway": "API Gateway",
+    "notification_service": "Notification Service",
+    "file_service": "File Service",
+    "monitoring_service": "Monitoring Service"
+  },
+  "forms": {
+    "service_name": "Service Name",
+    "service_description": "Service Description",
+    "select_template": "Select Template",
+    "port_number": "Port Number",
+    "create": "Create",
+    "cancel": "Cancel",
+    "save": "Save",
+    "required": "Required",
+    "optional": "Optional"
+  },
+  "messages": {
+    "service_created": "Service created successfully",
+    "service_deleted": "Service deleted",
+    "service_started": "Service started",
+    "service_stopped": "Service stopped",
+    "error_occurred": "An error occurred",
+    "confirm_delete": "Are you sure you want to delete this service?"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "colors": "Colors",
+    "fonts": "Fonts",
+    "save_settings": "Save Settings"
+  }
+}
