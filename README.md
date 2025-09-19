@@ -328,15 +328,15 @@ Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detal
 - Comunidad Python por las herramientas y librerías
 
 ---
-
+        
 ## 📞 Soporte
 
 - 🐛 **Issues**: [GitHub Issues](https://github.com/tu-usuario/fastapi-microservices-sdk/issues)
 - 💬 **Discusiones**: [GitHub Discussions](https://github.com/tu-usuario/fastapi-microservices-sdk/discussions)
-- 📧 **Email**: tu-email@ejemplo.com
+- 📧 **Email**: descargastacolu@gmail.com
 
 ---
 
 **⭐ Si este proyecto te ayuda, dale una estrella en GitHub!**
 
-*Última actualización: Diciembre 2025*
+*Última actualización: 19-09-2025*
